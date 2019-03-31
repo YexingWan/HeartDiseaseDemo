@@ -1,0 +1,242 @@
+{% extends "base_site.html" %}
+
+{% block title %} Data Management {% endblock title %}
+
+{% block stylesheets %}
+  {{ super() }}
+  <!-- Dropzone.js -->
+  <link href="{{ url_for('static', filename='vendors/dropzone/dist/min/dropzone.min.css') }}" rel="stylesheet">
+{% endblock stylesheets %}
+
+{% block content %}
+    <div class="right_col" role="main">
+      <div class="">
+        <div class="page-title">
+          <div class="title_left">
+            <h3>Data Management</h3>
+          </div>
+        </div>
+
+        <div class="row">
+          <form id="data_form" enctype="multipart/form-data">
+          <!-- water mains -->
+          <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+              <div class="x_title">
+                <h4>Water Mains</h4>
+              </div>
+              <div class="x_content">
+                <input type="file" accept=".csv" class="filestyle" data-buttonText="Choose file"
+                       id="water_main_file" name="water_main_file">
+              </div>
+            </div>
+          </div>
+          <!--/ water mains -->
+
+          <!-- failure records -->
+          <div class="col-md-12 col-sm-12 col-xs-12">
+            <div class="x_panel">
+              <div class="x_title">
+                <h4>Failure Records</h4>
+              </div>
+              <div class="x_content">
+                  <input type="file" accept=".csv" class="filestyle" data-buttonText="Choose file"
+                         id="failure_record_file" name="failure_record_file">
+              </div>
+            </div>
+          </div>
+          <!--/ Failure Records -->
+
+          <!-- Button -->
+          <div class="col-md-12 col-sm-12 col-xs-12" align="center">
+            <a class="btn btn-primary" href="javascript:void(0);" role="button" id="btn_submit">Submit</a>
+            <a class="btn btn-primary" href="javascript:void(0);" role="button" id="btn_reset">Reset</a>
+          </div>
+          <!--/ Button -->
+          </form>
+        </div>
+
+        <div class="modal" id="pleaseWaitDialog" data-backdrop="static" data-keyboard="false">
+            <div class="modal-header">
+                <h1>Processing...</h1>
+            </div>
+            <div class="modal-body">
+                <div class="progress progress-striped active">
+                    <div class="bar" style="width: 100%;"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row justify-content-start" style="display: none;" id="div_progress">
+          <div class="col-md-4 col-sm-4 col-xs-4">
+                <h5>Progress:</h5>
+                <ul class="list-group">
+                    <li class="list-group-item" style="display: none;" id="li_upload_chk"></li>
+                    <li class="list-group-item" style="display: none;" id="li_format_chk"></li>
+                    <li class="list-group-item" style="display: none;" id="li_merge_chk"></li>
+                </ul>
+            </div>
+        </div>
+      </div>
+    </div>
+{% endblock content %}
+
+{% block javascripts %}
+  {{ super() }}
+  <!-- bootstrap filestyle -->
+  <script src="{{ url_for('static', filename='vendors/bootstrap-filestyle-1.2.3/src/bootstrap-filestyle.min.js') }}"></script>
+  <!-- bootbox -->
+  <script src="{{ url_for('static', filename='vendors/bootbox.js/bootbox.min.js') }}"></script>
+  <!-- progressbar -->
+  <script src="{{ url_for('static', filename='vendors/bootstrap-progressbar/bootstrap-progressbar.js') }}"></script>
+  <!-- loading overlay -->
+  <script src="{{ url_for('static', filename='vendors/loadingoverlay/loadingoverlay.min.js') }}"></script>
+
+  <script>
+    // global variables
+    var waterMainFileName;
+    var failureRecordFileName;
+
+    $('#water_main_file').change(function(e) {
+      waterMainFileName = e.target.files[0].name;
+    });
+
+    $('#failure_record_file').change(function(e) {
+      failureRecordFileName = e.target.files[0].name;
+    });
+
+    // clear selected files
+    $('#btn_reset').click(function() {
+      reset_progress_div();
+
+      $(':file').filestyle('clear');
+      waterMainFileName = null;
+      failureRecordFileName = null;
+    });
+
+    // reset progress div
+    function reset_progress_div() {
+        $('#div_progress').hide();
+        $('#li_upload_chk').hide();
+        $('#li_format_chk').hide();
+        $('#li_merge_chk').hide();
+
+        $('#li_upload_chk').attr('class', 'list-group-item');
+        $('#li_format_chk').attr('class', 'list-group-item');
+        $('#li_merge_chk').attr('class', 'list-group-item');
+    }
+
+    // submit & start uploading
+    $(function() {
+        $('#btn_submit').click(function() {
+            reset_progress_div();
+            event.preventDefault();
+            if (waterMainFileName == null || failureRecordFileName == null) {
+                // no files are selected
+                bootbox.alert({
+                  title: "Warning",
+                  message: "Two files must be selected!",
+                  size: 'small'
+                });
+            } else if (waterMainFileName == failureRecordFileName) {
+                bootbox.alert({
+                  title: "Warning",
+                  message: "Two files cannot be the same!",
+                  size: 'small'
+                });
+            } else {
+                // show progress div
+                $.LoadingOverlay("show");
+                $('#div_progress').show();
+                $('#li_upload_chk').show();
+                // 1. upload data files
+                var form_data = new FormData($('#data_form')[0]);
+                $.ajax({
+                    type: 'POST',
+                    url: '/data_management/upload',
+                    data: form_data,
+                    contentType: false,
+                    processData: false,
+                    dataType: 'json'
+                }).done(function(data){
+                    // if upload is successful
+                    $('#li_upload_chk').addClass('list-group-item-success');
+                    $('#li_upload_chk').html('Data uploading: ' + '<strong>' + data['message'] + '</strong>');
+                    // check file formats
+                    check_file_formats()
+                }).fail(function(data){
+                    // hide progress div
+                    $.LoadingOverlay("hide");
+                    bootbox.alert({
+                      title: "Error",
+                      message: "Data uploading error!",
+                      size: 'small'
+                    });
+                });
+                // reset upload form
+                $(':file').filestyle('clear');
+                waterMainFileName = null;
+                failureRecordFileName = null;
+            }
+        });
+    });
+
+    // check file formats after successful upload
+    function check_file_formats() {
+        $('#li_format_chk').show();
+        $.ajax({
+            type: 'POST',
+            url: '/data_management/check_files',
+            contentType: false,
+            processData: false,
+            dataType: 'json'
+        }).done(function(data){
+            // if file formats checking is successful
+            if (data['status'] == 'succ') {
+                $('#li_format_chk').addClass('list-group-item-success');
+                // merge files
+                merge_files()
+            } else if (data['status'] == 'fail') {
+                $('#li_format_chk').addClass('list-group-item-danger');
+            }
+            $('#li_format_chk').html('Format checking: ' + '<strong>' + data['message'] + '</strong>');
+        }).fail(function(data){
+            $.LoadingOverlay("hide");
+            bootbox.alert({
+              title: "Error",
+              message: "Formats checking error!",
+              size: 'small'
+            });
+        });
+    }
+
+    // merge data files after successful formats check
+    function merge_files() {
+        $('#li_merge_chk').show();
+        $.ajax({
+            type: 'POST',
+            url: '/data_management/merge_files',
+            contentType: false,
+            processData: false,
+            dataType: 'text'
+        }).done(function(data){
+            // if file formats checking is successful
+            $.LoadingOverlay("hide");
+            data = JSON.parse(data);
+            if (data['status'] == 'succ')
+                $('#li_merge_chk').addClass('list-group-item-success');
+            else if (data['status'] == 'fail')
+                $('#li_merge_chk').addClass('list-group-item-danger');
+            $('#li_merge_chk').html('Files merging: ' + '<strong>' + data['message'] + '</strong>');
+        }).fail(function(data){
+            $.LoadingOverlay("hide");
+            bootbox.alert({
+              title: "Error",
+              message: "Files merging error!",
+              size: 'small'
+            });
+        });
+    }
+
+  </script>
+{% endblock javascripts %}

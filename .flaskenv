@@ -1,0 +1,1 @@
+FLASK_APP=aca_app

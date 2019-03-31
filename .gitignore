@@ -1,0 +1,37 @@
+# byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# tests and coverage
+*.pytest_cache
+.coverage
+
+# database & logs
+*.db
+*.log
+
+# venv
+env
+venv
+
+# other
+.DS_Store
+
+# sphinx docs 
+_build
+_static
+_templates
+
+# javascript
+package-lock.json
+
+# ignored path
+data_files/**/*.csv
+data_files/**/*.xlsx
+.idea/
+data_files/**/*.txt
+data_files/**/*.tsv
+
+# ignored model
+*.model
+

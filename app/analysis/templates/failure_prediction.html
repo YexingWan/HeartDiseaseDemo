@@ -1,0 +1,390 @@
+{% extends "base_site.html" %}
+
+{% block title %} Failure Prediction {% endblock title %}
+
+{% block stylesheets %}
+    {{ super() }}
+    <!-- bootstrap datetime picker -->
+    <link href="{{ url_for('static', filename='vendors/bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css') }}"
+          rel="stylesheet">
+    <link href="{{ url_for('static', filename='vendors/jquery.datatables/datatables.min.css') }}" rel="stylesheet">
+
+    <style type='text/css'>
+        hr {
+            margin-top: 3rem;
+            margin-bottom: 3rem;
+            border: 0;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .dataTables_wrapper .dt-buttons {
+            float: none;
+            text-align: right;
+        }
+    </style>
+{% endblock stylesheets %}
+
+{% block content %}
+    <div class="right_col" role="main">
+        <div class="">
+            <div class="page-title">
+                <div class="title_left">
+                    <h3>Failure Prediction</h3>
+                </div>
+            </div>
+
+            <div class="row">
+                <form id="option_form">
+                    <!-- condition for prediction -->
+                    <div class="col-md-12 col-sm-12 col-xs-12">
+                        <div class="x_panel">
+                            <div class="x_title">
+                                <h4>Options</h4>
+                            </div>
+                            <div class="x_content">
+                                <div class="form-group">
+                                    <label for="year_picker">Select financial year for prediction: </label>
+                                    <input type="text" id="year_picker"/>
+                                </div>
+                                <div class="form-check">
+                                    <label class="form-check-label" for="is_retrain">Rebuild model</label>
+                                    <input type="checkbox" class="form-check-input" id="is_retrain">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!--/ condition for prediction -->
+
+                    <!-- Button -->
+                    <div class="col-md-12 col-sm-12 col-xs-12" align="center">
+                        <a class="btn btn-primary" href="javascript:void(0);" role="button" id="btn_submit">Submit</a>
+                        <a class="btn btn-primary" href="javascript:void(0);" role="button" id="btn_reset">Reset</a>
+                    </div>
+                    <!--/ Button -->
+                </form>
+            </div>
+
+            <!-- prediction results display -->
+            <div class="row" style="display: none;" id="div_pred_results">
+                <!-- data table -->
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <div class="x_panel">
+                        <div class="x_title">
+                            <h4>Results</h4>
+                        </div>
+                        <div class="x_content">
+                            <!-- feature importance -->
+                            <div id="div_feat_importance" style="width: 90%; height:400px;">
+                            </div>
+                            <!--/ feature importance -->
+                            <div>
+                                <hr/>
+                            </div>
+                            <!-- data table -->
+                            <div id="div_table_title" style="width: 90%"></div>
+                            <div id="div_result" style="width: 90%; height:400px;">
+                            </div>
+                            <!--<a id='btn_result_download' href='/download/pred_result.csv' download="result.csv"></a>-->
+                        </div>
+                    </div>
+                </div>
+                <!--/ prediction results display -->
+            </div>
+
+        </div>
+    </div>
+{% endblock content %}
+
+{% block javascripts %}
+    {{ super() }}
+    <!-- bootstrap datetime picker -->
+    <script src="{{ url_for('static', filename='vendors/bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js') }}"></script>
+    <!-- bootbox -->
+    <script src="{{ url_for('static', filename='vendors/bootbox.js/bootbox.min.js') }}"></script>
+    <!-- loading overlay -->
+    <script src="{{ url_for('static', filename='vendors/loadingoverlay/loadingoverlay.min.js') }}"></script>
+    <!-- echarts4 -->
+    <script src="{{ url_for('static', filename='vendors/echarts4/echarts.min.js') }}"></script>
+    <!-- dataTable -->
+    <script src="{{ url_for('static', filename='vendors/jquery.datatables/datatables.min.js') }}"></script>
+
+
+    <script>
+
+        // reset results div
+        function reset_pre_results_div() {
+            $('#div_pred_results').hide();
+        }
+
+        // show div of feature importance
+        function show_feature_importance_div(raw_feat_data_str, year) {
+            // prepare data
+            var raw_feat_data = JSON.parse(raw_feat_data_str);
+
+            var x_data = raw_feat_data['data'][0];
+            var y_data = raw_feat_data['data'][1];
+
+            // based on prepared DOM, initialize echarts instance
+            var feat_importance_chart = echarts.init(document.getElementById('div_feat_importance'));
+
+            // specify chart configuration item and data
+            var option = {
+                title: {
+                    text: 'Feature Importance',
+                    subtext: '(download results)',
+                    sublink: '/download/feat_importance_' + year + '.csv',
+                    x: 'center'
+                },
+                grid: {
+                    bottom: 180
+                },
+                tooltip: {},
+                xAxis: {
+                    name: 'Feature',
+                    data: x_data,
+                    axisLabel: {
+                        interval: 0,
+                        rotate: 45
+                    }
+                },
+                yAxis: {
+                    name: 'Importance Score',
+                    nameLocation: 'center',
+                    nameRotate: 90,
+                    nameTextStyle: {
+                        padding: [0, 0, 30, 0]  // top, right, bottom, left
+                    }
+                },
+                series: [{
+                    type: 'bar',
+                    data: y_data,
+                    animation: true
+                }]
+            };
+
+            // use configuration item and data specified to show chart
+            feat_importance_chart.setOption(option);
+
+        }
+
+        // show data table div
+        function show_data_table_div_severside(year) {
+
+            var div_result = $('#div_result');
+            var div_table_title = $('#div_table_title');
+
+            div_result.empty();
+            div_table_title.empty();
+
+
+            var pred_year = $('#year_picker').val();
+
+            var title_html =
+                '<h4 align="center"><span style="color: #333333; font-weight: bold;">Prediction Results (' + pred_year + ')</span>' +
+                '<br/>' +
+                '<small><a href="/download/pred_result_' + year + '.csv">(download results)</a></small>' +
+                '</h4>';
+            div_table_title.html(title_html);
+
+            var table_html = '<table id="result_table" class="stripe" style="width:100%"></table>';
+            div_result.html(table_html);
+            var table_col = '<thead><tr>';
+
+
+            var cols = init_data["columns"];
+            var arrayLength = cols.length;
+            for (var i = 0; i < arrayLength; i++) {
+                table_col += '<th>' + cols[i] + '</th>';
+            }
+            table_col += '</thead></tr>';
+            var result_table = $('#result_table');
+            result_table.append(table_col);
+
+
+            var data_table = result_table.DataTable({
+                processing: true,
+                serverSide: true,
+                sPaginationType: "full_numbers",
+                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                bjQueryUI: true,
+                ajax: '/serverside_table'
+            });
+
+        }
+
+
+        function show_data_table_div(data, year) {
+            var div_result = $('#div_result');
+            var div_table_title = $('#div_table_title');
+
+            div_result.empty();
+            div_table_title.empty();
+
+
+            var pred_year = $('#year_picker').val();
+
+            var title_html =
+                '<h4 align="center"><span style="color: #333333; font-weight: bold;">Prediction Results (' + pred_year + ')</span>' +
+                '<br/>' +
+                '<small><a href="/download/pred_result_' + year + '.csv">(download results)</a></small>' +
+                '</h4>';
+            div_table_title.html(title_html);
+
+            var table_html = '<table id="result_table" class="stripe" style="width:100%"></table>';
+            div_result.html(table_html);
+            var table_col = '<thead><tr>';
+            var cols = data["columns"];
+            var arrayLength = cols.length;
+            for (var i = 0; i < arrayLength; i++) {
+                table_col += '<th>' + cols[i] + '</th>';
+            }
+            table_col += '</thead></tr>';
+            var result_table = $('#result_table');
+            result_table.append(table_col);
+
+            var data_table = result_table.DataTable({
+                data: data['data'],
+                'order': [[2, 'desc']],
+                "lengthChange": true,
+                searching: false
+            });
+
+        }
+
+        //show result
+        function show_result() {
+            var year = $('#year_picker').val();
+            $.post('/set_session_val',
+                {
+                    'pred_year': year
+                },
+                function (data, status) {
+                    console.log(status)
+                })
+            ;
+
+            $.ajax({
+                type: 'POST',
+                url: '/show_pred_result',
+                dataType: "json",
+                data:
+                    {
+                        'pred_year': year
+                    },
+                success: function (data) {
+                    console.log(data);
+                    if (data['message'] == 'DONE') {
+                        $.LoadingOverlay("hide");
+                        show_feature_importance_div(data['feat_importance'], year);
+                        console.log(data)
+                        show_data_table_div(data, year);
+                    }
+                    else {
+                        $.LoadingOverlay("hide");
+                        $('#div_pred_results').hide();
+                        bootbox.alert({
+                            title: "No Result Found.",
+                            message: "No Result of " + year + " found in server.",
+                            size: 'small'
+                        });
+                    }
+                }
+            }).fail(function (data) {
+                console.log(data);
+                $.LoadingOverlay("hide");
+                bootbox.alert({
+                    title: "Error",
+                    message: "Prediction error in show!",
+                    size: 'small'
+                });
+            });
+        }
+
+        // submit & start uploading
+        $(function () {
+            // clear form
+            $('#btn_reset').click(function () {
+                $('#option_form')[0].reset();
+            });
+
+            // get default year
+
+            var year_picker = $('#year_picker');
+
+            year_picker.on("dp.change", function (e) {
+                event.preventDefault();
+                reset_pre_results_div();
+                $.LoadingOverlay("show");
+                $('#div_pred_results').show();
+                show_result();
+            });
+
+            $.post(
+                '/get_session_val',
+                {
+                    session_key: 'pred_year'
+                },
+                function (data) {
+                    //console.log(data);
+                    if (data['pred_year'] > 0) {
+                        // console.log('ininin');
+                        year_picker.datetimepicker({
+                            format: "YYYY",
+                            viewMode: "years"
+                        });
+                        year_picker.val(data['pred_year']);
+                        year_picker.change();
+                    }
+                },
+                'json'
+            ).fail(function () {
+                bootbox.alert({
+                    title: "Error",
+                    message: "Get default year error",
+                    size: 'small'
+                });
+            });
+
+
+            $('#btn_submit').click(function () {
+                reset_pre_results_div();
+                event.preventDefault();
+                var pred_year = $('#year_picker').val();
+                var is_retrain = $('#is_retrain').prop('checked');
+                //console.log(pred_year);
+                if (pred_year == "") {
+                    // no files are selected
+                } else {
+                    // show loading
+                    $.LoadingOverlay("show");
+                    $.ajax({
+                        type: 'POST',
+                        url: '/failure_prediction/predict',
+                        data: {
+                            pred_year: pred_year,
+                            is_retrain: is_retrain
+                        },
+                        dataType: 'json'
+
+                    }).done(function (data) {
+                        // if prediction is successful
+                        $.LoadingOverlay("hide");
+                        $('#div_pred_results').show();
+                        show_feature_importance_div(data['feat_importance'], pred_year);
+                        //show_data_table_div_severside(pred_year)
+                        show_data_table_div(data, pred_year);
+
+                    }).fail(function (data) {
+                        $.LoadingOverlay("hide");
+                        bootbox.alert({
+                            title: "Warning",
+                            message: "Prediction year must be selected!",
+                            size: 'small'
+                        });
+                    })
+                }
+            })
+        });
+    </script>
+
+{% endblock javascripts %}

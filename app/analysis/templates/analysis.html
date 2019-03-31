@@ -1,0 +1,279 @@
+{% extends "base_site.html" %}
+
+{% block title %} Analysis {% endblock title %}
+
+{% block stylesheets %}
+    {{ super() }}
+    <link href="{{ url_for('static', filename='vendors/bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css') }}"
+          rel="stylesheet">
+
+{% endblock stylesheets %}
+
+{% block content %}
+    <div class="right_col" role="main">
+        <div class="">
+            <div class="page-title">
+                <div class="title_left">
+                    <h3>Analysis</h3>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <!-- Results download panel -->
+                    <div class="x_panel">
+                        <div class="form-group">
+                            <h4>Results Download:</h4>
+                            <label for="year_picker">year:</label>
+                            <input type="text" id="year_picker"/>
+                        </div>
+                        <div class="x_content">
+                            <div class="list-group">
+                                <a href="#" class="list-group-item list-group-item-action" id="priority_all_a">
+                                    <span class="glyphicon glyphicon-file "></span> Priority list (all)
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action" id="priority_375_a">
+                                    <span class="glyphicon glyphicon-file "></span> Priority list (size >= 375)
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action" id="feat_importance_a">
+                                    <span class="glyphicon glyphicon-file "></span> Feature importance scores
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action" id="shutdown_block_a">
+                                    <span class="glyphicon glyphicon-file "></span> Shutdown block priority
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action" id="trunk_a">
+                                    <span class="glyphicon glyphicon-file "></span> Trunk priority
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <!--/ Results download panel -->
+
+                    <!-- Performance evaluation -->
+                    <div class="x_panel">
+                        <div class="x_title">
+                            <h4>Performance Evaluation</h4>
+                        </div>
+                        <div class="x_content">
+                            <!-- evaluation curve -->
+                            <div id="div_eval_curve" style="width: 90%; height:400px;">
+                            </div>
+                            <!--/ evaluation curve -->
+                        </div>
+                    </div>
+                    <!--/ Performance evaluation -->
+
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block javascripts %}
+    {{ super() }}
+    <!-- bootstrap datetime picker -->
+    <script src="{{ url_for('static', filename='vendors/bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js') }}"></script>
+    <!-- bootbox -->
+    <script src="{{ url_for('static', filename='vendors/bootbox.js/bootbox.min.js') }}"></script>
+    <!-- loading overlay -->
+    <script src="{{ url_for('static', filename='vendors/loadingoverlay/loadingoverlay.min.js') }}"></script>
+    <!-- echarts4 -->
+    <script src="{{ url_for('static', filename='vendors/echarts4/echarts.min.js') }}"></script>
+
+    <script>
+        var year_picker = $('#year_picker');
+
+        function eval_f(year) {
+            // get performance results if available
+            $.ajax({
+                type: 'POST',
+                url: '/analysis/get_eval_results',
+                data: {
+                    cur_year: year
+                },
+                dataType: 'json'
+            }).done(function (data) {
+                $('#div_eval_curve').empty();
+
+                // if eval file exists
+                if (data['status'] == 'succ') {
+
+                    show_eval_curv(data['data'], data['data_375']);
+                    $('#priority_375_a').attr('href', "/download/priority_list_375_" + year + ".csv");
+                    $('#priority_all_a').attr('href', "/download/priority_list_all_" + year + ".csv");
+                    $('#feat_importance_a').attr('href', "/download/feat_importance_" + year + ".csv");
+                    $('#shutdown_block_a').attr('href', "/download/shutdown_block_priority_" + year + ".csv");
+                    $('#trunk_a').attr('href', "/download/trunk_priority_" + year + ".csv");
+
+
+                    $('#priority_375_a').attr('class', "list-group-item list-group-item-action");
+                    $('#priority_all_a').attr('class', "list-group-item list-group-item-action");
+                    $('#feat_importance_a').attr('class', "list-group-item list-group-item-action");
+                    $('#shutdown_block_a').attr('class', "list-group-item list-group-item-action");
+                    $('#trunk_a').attr('class', "list-group-item list-group-item-action");
+
+                }
+                else {
+                    $('#div_eval_curve').html('Please perform <strong><a href="/failure_prediction">Failure Prediction</a></strong> first!');
+
+                    $('#priority_375_a').attr('class', "list-group-item disabled");
+                    $('#priority_all_a').attr('class', "list-group-item disabled");
+                    $('#feat_importance_a').attr('class', "list-group-item disabled");
+                    $('#shutdown_block_a').attr('class', "list-group-item disabled");
+                    $('#trunk_a').attr('class', "list-group-item disabled");
+
+                    $('#priority_375_a').attr('href', "#");
+                    $('#priority_all_a').attr('href', "#");
+                    $('#feat_importance_a').attr('href', "#");
+                    $('#shutdown_block_a').attr('href', "#");
+                    $('#trunk_a').attr('href', "#");
+                }
+            }).fail(function (data) {
+                $('#div_eval_curve').html('Please perform <a href="/failure_prediction">failure prediction</a> first!');
+
+                $('#priority_375_a').attr('class', "list-group-item disabled");
+                $('#priority_all_a').attr('class', "list-group-item disabled");
+                $('#feat_importance_a').attr('class', "list-group-item disabled");
+                $('#shutdown_block_a').attr('class', "list-group-item disabled");
+                $('#trunk_a').attr('class', "list-group-item disabled");
+
+                $('#priority_375_a').attr('href', "#");
+                $('#priority_all_a').attr('href', "#");
+                $('#feat_importance_a').attr('href', "#");
+                $('#shutdown_block_a').attr('href', "#");
+                $('#trunk_a').attr('href', "#");
+            });
+        }
+
+        // show div of evaluation curve
+        function show_eval_curv(raw_data_str, raw_375_data_str) {
+
+            // prepare data
+            var raw_data = JSON.parse(raw_data_str);
+            var raw_375_data = JSON.parse(raw_375_data_str);
+
+            var x_data = raw_data['data'][0];
+            var y_data = raw_data['data'][1];
+            var x_375_data = raw_375_data['data'][0];
+            var y_375_data = raw_375_data['data'][1];
+
+            // based on prepared DOM, initialize echarts instance
+            var eval_div = document.getElementById('div_eval_curve');
+            eval_div.removeAttribute("_echarts_instance_");
+            var eval_curve_chart = echarts.init(eval_div);
+
+            // specify chart configuration item and data
+            var option = {
+                title: {
+                    text: 'Evaluation (' + year_picker.val() + ')',
+                    subtext: '(download results)',
+                    sublink: '/download/eval_' + year_picker.val() + '.csv',
+                    x: 'center'
+                },
+                legend: {
+                    top: '16.5%',
+                    right: '10%',
+                    orient: 'vertical',
+                    data: ['Detection', 'Detection (>=375)'],
+                    selectedMode: false
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross'
+                    },
+                    backgroundColor: 'rgba(245, 245, 245, 0.8)',
+                    borderWidth: 1,
+                    borderColor: '#ccc',
+                    padding: 10,
+                    textStyle: {
+                        color: '#000'
+                    },
+                    formatter: function (params) {
+                        console.log(params);
+                        return 'Inspection: ' + params[0].name + '%' + '<br />' +
+                            'Detection: ' + params[0].value.toFixed(2) + '%' + '<br />' +
+                            'Detection (>=375): ' + params[1].value.toFixed(2) + '%' + '<br />';
+                    }
+                },
+                dataZoom: [{
+                    type: 'slider',
+                    show: true,
+                    xAxisIndex: [0],
+                    start: 0,
+                    end: 100
+                }],
+                xAxis: {
+                    name: 'Inspection rate (%)',
+                    data: x_data
+                },
+                yAxis: {
+                    name: 'Detection rate(%)',
+                    nameLocation: 'center',
+                    nameRotate: 90,
+                    nameTextStyle: {
+                        padding: [0, 0, 30, 0]  // top, right, bottom, left
+                    }
+                },
+                series: [{
+                    name: 'Detection',
+                    type: 'line',
+                    animation: true,
+                    data: y_data,
+                    markArea: {
+                        data: [[{
+                            name: 'Top 20%',
+                            xAxis: '0',
+                            itemStyle: {normal: {color: 'red'}}
+                        }, {
+                            xAxis: '20'
+                        }]]
+                    }
+                }, {
+                    name: 'Detection (>=375)',
+                    type: 'line',
+                    animation: true,
+                    data: y_375_data
+                }]
+            };
+
+            // use configuration item and data specified to show chart
+            eval_curve_chart.setOption(option);
+
+        }
+
+
+        $(function () {
+            year_picker.on("dp.change", function (e) {
+                console.log(year_picker.val());
+                eval_f(year_picker.val());
+            });
+
+            $.post(
+                '/get_session_val',
+                {
+                    session_key: 'pred_year'
+                },
+                function (data) {
+                    console.log(data['pred_year']);
+                    year_picker.datetimepicker({
+                        format: "YYYY",
+                        viewMode: "years"
+                    });
+                    year_picker.val(data['pred_year']);
+                    year_picker.change();
+                }
+            ).fail(function () {
+                bootbox.alert({
+                    title: "Error",
+                    message: "Get default year error",
+                    size: 'small'
+                });
+            });
+
+        });
+
+
+    </script>
+{% endblock javascripts %}
+
