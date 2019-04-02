@@ -1,0 +1,56 @@
+{% extends "base_site.html" %}
+
+{% block title %} GIS Data Layer {% endblock title %}
+
+{% block stylesheets %}
+    {{ super() }}
+    <link href="{{ url_for('static', filename='vendors/bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.css') }}"
+          rel="stylesheet">
+
+{% endblock stylesheets %}
+
+{% block content %}
+    <div class="right_col" role="main">
+        <div class="">
+            <div class="page-title">
+                <div class="title_left">
+                    <h3>Training Data Inspection</h3>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <!-- For Traing Data Visualization -->
+                    <div class="x_panel" id = 'vis'>
+                        <!--TODO-->
+                    </div>
+                    <!--/ For Traing Data Visualization -->
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
+
+{% block javascripts %}
+    {{ super() }}
+    <!-- bootstrap datetime picker -->
+    <script src="{{ url_for('static', filename='vendors/bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js') }}"></script>
+    <!-- bootbox -->
+    <script src="{{ url_for('static', filename='vendors/bootbox.js/bootbox.min.js') }}"></script>
+    <!-- loading overlay -->
+    <script src="{{ url_for('static', filename='vendors/loadingoverlay/loadingoverlay.min.js') }}"></script>
+    <!-- echarts4 -->
+    <script src="{{ url_for('static', filename='vendors/echarts4/echarts.min.js') }}"></script>
+
+    <script>
+
+
+        $(function () {
+//            TODO: visualize function
+
+        });
+
+
+    </script>
+{% endblock javascripts %}
+

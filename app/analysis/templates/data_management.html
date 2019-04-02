@@ -3,240 +3,390 @@
 {% block title %} Data Management {% endblock title %}
 
 {% block stylesheets %}
-  {{ super() }}
-  <!-- Dropzone.js -->
-  <link href="{{ url_for('static', filename='vendors/dropzone/dist/min/dropzone.min.css') }}" rel="stylesheet">
+{{ super() }}
+<!-- Dropzone.js -->
+<link href="{{ url_for('static', filename='vendors/dropzone/dist/min/dropzone.min.css') }}" rel="stylesheet">
 {% endblock stylesheets %}
 
 {% block content %}
-    <div class="right_col" role="main">
-      <div class="">
+<div class="right_col" role="main">
+    <div class="">
         <div class="page-title">
-          <div class="title_left">
-            <h3>Data Management</h3>
-          </div>
+            <div class="title_left">
+                <h3>Data Upload and Predict</h3>
+            </div>
         </div>
-
         <div class="row">
-          <form id="data_form" enctype="multipart/form-data">
-          <!-- water mains -->
-          <div class="col-md-12 col-sm-12 col-xs-12">
-            <div class="x_panel">
-              <div class="x_title">
-                <h4>Water Mains</h4>
-              </div>
-              <div class="x_content">
-                <input type="file" accept=".csv" class="filestyle" data-buttonText="Choose file"
-                       id="water_main_file" name="water_main_file">
-              </div>
-            </div>
-          </div>
-          <!--/ water mains -->
-
-          <!-- failure records -->
-          <div class="col-md-12 col-sm-12 col-xs-12">
-            <div class="x_panel">
-              <div class="x_title">
-                <h4>Failure Records</h4>
-              </div>
-              <div class="x_content">
-                  <input type="file" accept=".csv" class="filestyle" data-buttonText="Choose file"
-                         id="failure_record_file" name="failure_record_file">
-              </div>
-            </div>
-          </div>
-          <!--/ Failure Records -->
-
-          <!-- Button -->
-          <div class="col-md-12 col-sm-12 col-xs-12" align="center">
-            <a class="btn btn-primary" href="javascript:void(0);" role="button" id="btn_submit">Submit</a>
-            <a class="btn btn-primary" href="javascript:void(0);" role="button" id="btn_reset">Reset</a>
-          </div>
-          <!--/ Button -->
-          </form>
+            <form id="data_form" enctype="multipart/form-data">
+                <div class="col-md-12 col-sm-12 col-xs-12">
+                    <div class="x_panel">
+                        <div class="x_title">
+                            <h4>Training Data</h4>
+                        </div>
+                        <div class="x_content">
+                            <input type="file" class="filestyle" data-buttonText="Choose file"
+                                   id="file_name" name="file_name">
+                        </div>
+                    </div>
+                </div>
+                <!-- Button -->
+                <div class="col-md-12 col-sm-12 col-xs-12" align="center">
+                    <a class="btn btn-primary" href="javascript:void(0);" role="button" id="btn_submit">Submit</a>
+                    <a class="btn btn-primary" href="javascript:void(0);" role="button" id="btn_reset">Reset</a>
+                </div>
+                <!--/ Button -->
+            </form>
         </div>
+        <div class="row" style="display: none;" id="div_pred_results">
+            <!-- data table -->
+            <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h4>Results</h4>
+                    </div>
+                    <div class="x_content">
 
-        <div class="modal" id="pleaseWaitDialog" data-backdrop="static" data-keyboard="false">
-            <div class="modal-header">
-                <h1>Processing...</h1>
-            </div>
-            <div class="modal-body">
-                <div class="progress progress-striped active">
-                    <div class="bar" style="width: 100%;"></div>
+                        <!-- feature importance -->
+                        <div id="div_feat_importance" style="width: 90%; height:400px;"></div>
+                        <!--/ feature importance -->
+
+                        <div>
+                            <hr/>
+                        </div>
+
+                        <!-- data table -->
+                        <div id="div_table_title" style="width: 90%"></div>
+                        <div id="div_result" style="width: 90%; height:400px;"></div>
+
+                    </div>
                 </div>
             </div>
+            <!--/ prediction results display -->
         </div>
+        <div class="row" style="display: none;" id="div_eval">
+            <!-- data table -->
+            <div>
+                <div class="x_panel">
+                    <div class="x_title">
+                        <h4>Performance Evaluation</h4>
+                    </div>
+                    <div class="x_content">
+                        <!-- evaluation curve -->
+                        <div id="div_eval_curve" style="width: 90%; height:400px;">
+                        </div>
+                        <!--/ evaluation curve -->
+                    </div>
+                </div>
+                <!--/ Performance evaluation -->
 
-        <div class="row justify-content-start" style="display: none;" id="div_progress">
-          <div class="col-md-4 col-sm-4 col-xs-4">
-                <h5>Progress:</h5>
-                <ul class="list-group">
-                    <li class="list-group-item" style="display: none;" id="li_upload_chk"></li>
-                    <li class="list-group-item" style="display: none;" id="li_format_chk"></li>
-                    <li class="list-group-item" style="display: none;" id="li_merge_chk"></li>
-                </ul>
             </div>
         </div>
-      </div>
+        <!--/ prediction results display -->
     </div>
+</div>
+</div>
+
 {% endblock content %}
 
 {% block javascripts %}
-  {{ super() }}
-  <!-- bootstrap filestyle -->
-  <script src="{{ url_for('static', filename='vendors/bootstrap-filestyle-1.2.3/src/bootstrap-filestyle.min.js') }}"></script>
-  <!-- bootbox -->
-  <script src="{{ url_for('static', filename='vendors/bootbox.js/bootbox.min.js') }}"></script>
-  <!-- progressbar -->
-  <script src="{{ url_for('static', filename='vendors/bootstrap-progressbar/bootstrap-progressbar.js') }}"></script>
-  <!-- loading overlay -->
-  <script src="{{ url_for('static', filename='vendors/loadingoverlay/loadingoverlay.min.js') }}"></script>
+{{ super() }}
+<!-- bootstrap filestyle -->
+<script src="{{ url_for('static', filename='vendors/bootstrap-filestyle-1.2.3/src/bootstrap-filestyle.min.js') }}"></script>
+<!-- bootbox -->
+<script src="{{ url_for('static', filename='vendors/bootbox.js/bootbox.min.js') }}"></script>
+<!-- progressbar -->
+<script src="{{ url_for('static', filename='vendors/bootstrap-progressbar/bootstrap-progressbar.js') }}"></script>
+<!-- loading overlay -->
+<script src="{{ url_for('static', filename='vendors/loadingoverlay/loadingoverlay.min.js') }}"></script>
 
-  <script>
-    // global variables
-    var waterMainFileName;
-    var failureRecordFileName;
+<script>
 
-    $('#water_main_file').change(function(e) {
-      waterMainFileName = e.target.files[0].name;
-    });
+    // global file handle
+    var file_name;
 
-    $('#failure_record_file').change(function(e) {
-      failureRecordFileName = e.target.files[0].name;
-    });
+    function show_eval_curv_div(data) {
 
-    // clear selected files
-    $('#btn_reset').click(function() {
-      reset_progress_div();
+        // prepare data
+        var raw_data = JSON.parse(data['data']);
 
-      $(':file').filestyle('clear');
-      waterMainFileName = null;
-      failureRecordFileName = null;
-    });
+        var x_data = raw_data['data'][0];
+        var y_data = raw_data['data'][1];
 
-    // reset progress div
-    function reset_progress_div() {
-        $('#div_progress').hide();
-        $('#li_upload_chk').hide();
-        $('#li_format_chk').hide();
-        $('#li_merge_chk').hide();
+        // based on prepared DOM, initialize echarts instance
+        var eval_div = document.getElementById('div_eval_curve');
+        eval_div.removeAttribute("_echarts_instance_");
+        var eval_curve_chart = echarts.init(eval_div);
 
-        $('#li_upload_chk').attr('class', 'list-group-item');
-        $('#li_format_chk').attr('class', 'list-group-item');
-        $('#li_merge_chk').attr('class', 'list-group-item');
+        // specify chart configuration item and data
+        var option = {
+            title: {
+                text: 'Result',
+                x: 'center'
+            },
+            legend: {
+                top: '16.5%',
+                right: '10%',
+                orient: 'vertical',
+                data: ['Result'],
+                selectedMode: false
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'cross'
+                },
+                backgroundColor: 'rgba(245, 245, 245, 0.8)',
+                borderWidth: 1,
+                borderColor: '#ccc',
+                padding: 10,
+                textStyle: {
+                    color: '#000'
+                },
+                formatter: function (params) {
+                    console.log(params);
+                    return 'Inspection: ' + params[0].name + '%' + '<br />' +
+                        'Detection: ' + params[0].value.toFixed(2) + '%' + '<br />'
+                }
+            },
+            dataZoom: [{
+                type: 'slider',
+                show: true,
+                xAxisIndex: [0],
+                start: 0,
+                end: 100
+            }],
+            xAxis: {
+                name: 'Inspection rate (%)',
+                data: x_data
+            },
+            yAxis: {
+                name: 'Detection rate(%)',
+                nameLocation: 'center',
+                nameRotate: 90,
+                nameTextStyle: {
+                    padding: [0, 0, 30, 0]  // top, right, bottom, left
+                }
+            },
+            series: [{
+                name: 'Result',
+                type: 'line',
+                animation: true,
+                data: y_data,
+                markArea: {
+                    data: [[{
+                        name: 'Top 20%',
+                        xAxis: '0',
+                        itemStyle: {normal: {color: 'red'}}
+                    }, {
+                        xAxis: '20'
+                    }]]
+                }
+            }]
+        };
+
+        // use configuration item and data specified to show chart
+        eval_curve_chart.setOption(option);
+
     }
 
-    // submit & start uploading
-    $(function() {
-        $('#btn_submit').click(function() {
-            reset_progress_div();
-            event.preventDefault();
-            if (waterMainFileName == null || failureRecordFileName == null) {
-                // no files are selected
-                bootbox.alert({
-                  title: "Warning",
-                  message: "Two files must be selected!",
-                  size: 'small'
-                });
-            } else if (waterMainFileName == failureRecordFileName) {
-                bootbox.alert({
-                  title: "Warning",
-                  message: "Two files cannot be the same!",
-                  size: 'small'
-                });
-            } else {
-                // show progress div
-                $.LoadingOverlay("show");
-                $('#div_progress').show();
-                $('#li_upload_chk').show();
-                // 1. upload data files
-                var form_data = new FormData($('#data_form')[0]);
-                $.ajax({
-                    type: 'POST',
-                    url: '/data_management/upload',
-                    data: form_data,
-                    contentType: false,
-                    processData: false,
-                    dataType: 'json'
-                }).done(function(data){
-                    // if upload is successful
-                    $('#li_upload_chk').addClass('list-group-item-success');
-                    $('#li_upload_chk').html('Data uploading: ' + '<strong>' + data['message'] + '</strong>');
-                    // check file formats
-                    check_file_formats()
-                }).fail(function(data){
-                    // hide progress div
-                    $.LoadingOverlay("hide");
-                    bootbox.alert({
-                      title: "Error",
-                      message: "Data uploading error!",
-                      size: 'small'
-                    });
-                });
-                // reset upload form
-                $(':file').filestyle('clear');
-                waterMainFileName = null;
-                failureRecordFileName = null;
-            }
-        });
-    });
+    function show_feature_importance_div(data) {
+        // prepare data
+        var raw_feat_data = JSON.parse(data['feat_importance']);
 
-    // check file formats after successful upload
-    function check_file_formats() {
-        $('#li_format_chk').show();
+        var x_data = raw_feat_data['data'][0];
+        var y_data = raw_feat_data['data'][1];
+
+        // based on prepared DOM, initialize echarts instance
+        var feat_importance_chart = echarts.init(document.getElementById('div_feat_importance'));
+
+        // specify chart configuration item and data
+        var option = {
+            title: {
+                text: 'Feature Importance',
+                x: 'center'
+            },
+            grid: {
+                bottom: 180
+            },
+            tooltip: {},
+            xAxis: {
+                name: 'Feature',
+                data: x_data,
+                axisLabel: {
+                    interval: 0,
+                    rotate: 45
+                }
+            },
+            yAxis: {
+                name: 'Importance Score',
+                nameLocation: 'center',
+                nameRotate: 90,
+                nameTextStyle: {
+                    padding: [0, 0, 30, 0]  // top, right, bottom, left
+                }
+            },
+            series: [{
+                type: 'bar',
+                data: y_data,
+                animation: true
+            }]
+        };
+
+        // use configuration item and data specified to show chart
+        feat_importance_chart.setOption(option);
+
+    }
+
+    function show_data_table_div(data) {
+        var div_result = $('#div_result');
+        var div_table_title = $('#div_table_title');
+
+        div_result.empty();
+        div_table_title.empty();
+
+        var pred_year = $('#year_picker').val();
+
+        var title_html =
+            '<h4 align="center"><span style="color: #333333; font-weight: bold;">Prediction Results (' + pred_year + ')' +
+            '</h4>';
+        div_table_title.html(title_html);
+
+        var table_html = '<table id="result_table" class="stripe" style="width:100%"></table>';
+        div_result.html(table_html);
+        var table_col = '<thead><tr>';
+        var cols = data["columns"];
+        var arrayLength = cols.length;
+        for (var i = 0; i < arrayLength; i++) {
+            table_col += '<th>' + cols[i] + '</th>';
+        }
+        table_col += '</thead></tr>';
+        var result_table = $('#result_table');
+        result_table.append(table_col);
+
+        var data_table = result_table.DataTable({
+            data: data['data'],
+            'order': [[2, 'desc']],
+            "lengthChange": true,
+            searching: false
+        });
+
+    }
+
+    function predict_and_show_result() {
+        $.LoadingOverlay("show");
         $.ajax({
             type: 'POST',
-            url: '/data_management/check_files',
+            url: '/data_management/predict',
+            dataType: "json",
+            success: function (data) {
+                console.log(data);
+                if (data['message'] == 'DONE') {
+                    console.log(data);
+                    show_feature_importance_div(data);
+                    show_data_table_div(data);
+                    eval_f()
+                }
+            }
+        }).fail(function (data) {
+            console.log(data);
+            $.LoadingOverlay("hide");
+            bootbox.alert({
+                title: "Error",
+                message: "Prediction error in show!",
+                size: 'small'
+            });
+        });
+    }
+
+    function upload_file() {
+        var form_data = new FormData($('#data_form')[0]);
+        $.ajax({
+            type: 'POST',
+            url: '/data_management/upload',
+            data: form_data,
             contentType: false,
             processData: false,
             dataType: 'json'
-        }).done(function(data){
-            // if file formats checking is successful
-            if (data['status'] == 'succ') {
-                $('#li_format_chk').addClass('list-group-item-success');
-                // merge files
-                merge_files()
-            } else if (data['status'] == 'fail') {
-                $('#li_format_chk').addClass('list-group-item-danger');
-            }
-            $('#li_format_chk').html('Format checking: ' + '<strong>' + data['message'] + '</strong>');
-        }).fail(function(data){
+        }).done(function (data) {
+            console.log(data['message'])
+        }).fail(function (e) {
             $.LoadingOverlay("hide");
+            // hide progress div
             bootbox.alert({
-              title: "Error",
-              message: "Formats checking error!",
-              size: 'small'
+                title: "Error",
+                message: "Data uploading error!",
+                size: 'small'
             });
         });
+
     }
 
-    // merge data files after successful formats check
-    function merge_files() {
-        $('#li_merge_chk').show();
+    function eval_f() {
+        // get performance results if available
         $.ajax({
-            type: 'POST',
-            url: '/data_management/merge_files',
-            contentType: false,
-            processData: false,
-            dataType: 'text'
-        }).done(function(data){
-            // if file formats checking is successful
+            type: 'GET',
+            url: '/data_management/get_eval_results'
+        }).done(function (data) {
+            $('#div_eval_curve').empty();
+
+            // if eval file exists
+            if (data['message'] == 'DONE') {
+                show_eval_curv_div(data);
+                $.LoadingOverlay("hide");
+            }
+            else {
+                $('#div_eval_curve').html('Please perform <strong><a href="/failure_prediction">Failure Prediction</a></strong> first!');
+                $.LoadingOverlay("hide");
+            }
+        }).fail(function (data) {
+            $('#div_eval_curve').html('Please perform <a href="/failure_prediction">failure prediction</a> first!');
             $.LoadingOverlay("hide");
-            data = JSON.parse(data);
-            if (data['status'] == 'succ')
-                $('#li_merge_chk').addClass('list-group-item-success');
-            else if (data['status'] == 'fail')
-                $('#li_merge_chk').addClass('list-group-item-danger');
-            $('#li_merge_chk').html('Files merging: ' + '<strong>' + data['message'] + '</strong>');
-        }).fail(function(data){
-            $.LoadingOverlay("hide");
-            bootbox.alert({
-              title: "Error",
-              message: "Files merging error!",
-              size: 'small'
-            });
         });
     }
 
-  </script>
+    $(function () {
+        $('#div_pred_results').hide();
+
+        $('#div_eval').hide();
+
+        $('#file_name').change(function (e) {
+            file_name = e.target.files[0].name;
+        });
+
+        $('#btn_reset').click(function () {
+            $('#div_pred_results').hide();
+            $('#div_eval').hide();
+            $(':file').filestyle('clear');
+            file_name = null;
+        });
+
+        $('#btn_submit').click(function () {
+            event.preventDefault();
+            if (file_name == null) {
+                // no files are selected
+                bootbox.alert({
+                    title: "Warning",
+                    message: "Two files must be selected!",
+                    size: 'small'
+                });
+            } else {
+                // 1. upload data files
+                upload_file();
+
+                // 2. data processing predict and show
+                predict_and_show_result();
+
+                $('#div_pred_results').show();
+
+                $('#div_eval').show();
+
+                // reset upload form
+                $(':file').filestyle('clear');
+                file_name = null;
+            }
+        });
+    });
+
+
+</script>
 {% endblock javascripts %}

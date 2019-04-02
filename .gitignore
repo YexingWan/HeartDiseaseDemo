@@ -35,3 +35,5 @@ data_files/**/*.tsv
 # ignored model
 *.model
 
+.DS_Store
+

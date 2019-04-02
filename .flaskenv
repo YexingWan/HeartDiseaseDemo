@@ -1,1 +1,1 @@
-FLASK_APP=aca_app
+FLASK_APP=app
