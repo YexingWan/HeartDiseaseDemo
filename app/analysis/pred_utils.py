@@ -3,15 +3,19 @@ import numpy as np
 import math
 import time
 from sklearn import preprocessing
-import config
+import HeartDiseaseDemo.config as config
 import os
 import xgboost
+import HeartDiseaseDemo.config
 
 presult = None
 n_thread = 8
 
 # TODO: change the label name
-label_name = "Failed"
+label_name = "target"
+columns_name = ["age", "sex", "chest pain type", "resting blood pressure", "serum cholestoral", "fasting blood sugar",\
+                     "resting electrocardiographic results", "maximum heart rate achieved", "exercise induced angina",\
+                     "oldpeak", "slope of the peak exercise ST segment", "number of major vessels", "thal", "target"]
 
 
 # TODO: construct data for prediction
@@ -36,6 +40,9 @@ def predict(df):
 
         y_test = df[label_name]
         X_test = df.drop([label_name], axis=1)
+
+
+
         xgb1 = xgboost.XGBClassifier({'nthread': n_thread}, seed=1)
         xgb1.load_model(os.path.join(config.MODEL_PATH))
         test_result = xgb1.predict_proba(X_test)[:, 1]
@@ -90,6 +97,9 @@ def predict(df):
 
 # TODO: train model
 def train():
+
+
+
     pass
 
 

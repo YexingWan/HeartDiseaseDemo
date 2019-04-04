@@ -16,7 +16,7 @@ EVAL_FILE = os.path.join(OUTPUT_DIR, 'eval.csv')
 RESULT_FILE = os.path.join(OUTPUT_DIR, 'result.csv')
 
 # file
-TRAINING_DATA = os.path.join(DATA_DIR,'')
+TRAINING_DATA = os.path.join(DATA_DIR,'processed.cleveland.data')
 
 
 COLS_SHOW_MAP = {
