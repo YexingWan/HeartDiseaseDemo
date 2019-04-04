@@ -22,6 +22,28 @@
                 <div class="col-md-12 col-sm-12 col-xs-12">
                     <!-- For Traing Data Visualization -->
                     <div class="x_panel" id = 'vis'>
+                        <div class = "vis_option" id = "vis_opts">
+                            <select>
+                                    <option value="age">age</option>
+                                    <option value="sex">sex</option>
+                                    <option value="CPT">chest pain type</option>
+                                    <option value="RBP">resting blood pressure</option>
+                                    <option value="SC">serum cholestoral in mg/dl</option>
+                                    <option value="FBS">fasting blood sugar > 120 mg/dl</option>
+                                    <option value="RER">resting electrocardiographic results</option>
+                                    <option value="MHRA">maximum heart rate achieved</option>
+                                    <option value="EIA">exercise induced angina</option>
+                                    <option value="oldpeak">oldpeak</option>
+                                    <option value="SOTPESTS">the slope of the peak exercise ST segment</option>
+                                    <option value="NOMV">number of major vessels (0-3) colored by flourosopy</option>
+                                    <option value="thal">thal</option>
+                                    <option value="target">target</option>
+                            </select>
+                            <button type="button" onclick="Onclick_visualize()">Visualization</button>
+                        </div>
+                        <div class = "vis_display" id = "vis_dis">
+
+                        </div>> 
                         <!--TODO-->
                     </div>
                     <!--/ For Traing Data Visualization -->
@@ -52,5 +74,11 @@
 
 
     </script>
+
+<script>
+        function Onclick_visualize() {
+          document.getElementById("demo").innerHTML = "Hello World";
+        }
+        </script>
 {% endblock javascripts %}
 
