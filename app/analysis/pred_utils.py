@@ -3,10 +3,9 @@ import numpy as np
 import math
 import time
 from sklearn import preprocessing
-import HeartDiseaseDemo.config as config
+import config
 import os
 import xgboost
-import HeartDiseaseDemo.config
 
 presult = None
 n_thread = 8
