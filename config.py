@@ -16,11 +16,24 @@ EVAL_FILE = os.path.join(OUTPUT_DIR, 'eval.csv')
 RESULT_FILE = os.path.join(OUTPUT_DIR, 'result.csv')
 
 # file
-TRAINING_DATA = os.path.join(DATA_DIR,'processed.cleveland.data')
+TRAINING_DATA = os.path.join(STABLE_DIR,'processed.cleveland.data')
 
 
 COLS_SHOW_MAP = {
-    'a':'show as a',
-    'b':'show as b'
+    'age':'age',
+    'sex':'sex',
+    'CPT': 'chest pain type',
+    'RBP': 'resting blood pressure',
+    'SC': 'serum cholestoral',
+    'FBS': 'fasting blood sugar',
+    'RER': 'resting electrocardiographic results',
+    'MHRA': 'maximum heart rate achieved',
+    'EIA': 'exercise induced angina',
+    'oldpeak': 'oldpeak',
+    'SOTPESTS': 'slope of the peak exercise ST segment',
+    'NOMV': 'number of major vessels (0-3) colored by flourosopy',
+    'thal': 'thal'
+
+
 }
 
