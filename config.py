@@ -33,7 +33,5 @@ COLS_SHOW_MAP = {
     'SOTPESTS': 'slope of the peak exercise ST segment',
     'NOMV': 'number of major vessels (0-3) colored by flourosopy',
     'thal': 'thal'
-
-
 }
 

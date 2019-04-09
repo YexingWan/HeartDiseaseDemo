@@ -33,3 +33,4 @@ xgboost==0.81
 xlrd==1.2.0
 tornado
 pycurl
+joblib==0.13.2

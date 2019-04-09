@@ -10,10 +10,11 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn import svm
 from sklearn.metrics import accuracy_score
 from keras.models import Sequential
-from keras.layers import Dense, Activation
+from keras.layers import Dense
 from keras.optimizers import Adam
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.model_selection import KFold
+import joblib
 import config
 import os
 import xgboost
@@ -63,15 +64,15 @@ def construct_data():
     train_df,  eval_df = train_test_split(data_df, test_size = 0.1)
 
     train_x = train_df.drop(['target'], axis = 1)
-    train_x = pd.get_dummies(train_x)
+    #train_x = pd.get_dummies(train_x)
     train_y = train_df['target']
 
 
     eval_x = eval_df.drop(['target'], axis=1)
-    eval_x = pd.get_dummies(eval_x)
+    #eval_x = pd.get_dummies(eval_x)
     eval_y = eval_df['target']
 
-    print(train_x.shape[1])
+
 
     return train_x.values, train_y.values, eval_x.values, eval_y.values
 
@@ -80,49 +81,75 @@ def construct_data():
 
 
 def predict(df):
-    def analyse(df, cols_cate_feature_list):
-
+    def analyse(df):
         df_copy = df.copy()
 
-        # encode the category columns as [0,1,...]
-        for c_f in cols_cate_feature_list:
-            df[c_f] = df[c_f].astype("category")
-            lbe = preprocessing.LabelEncoder()
-            _tem = list(df[c_f].values)
-            lbe.fit(_tem)
-            df[c_f] = lbe.transform(_tem)
+        num_col_list = ['age', 'RBP', 'SC', 'MHRA', 'oldpeak']
+
+
         # ============================↑ data processing======================
+        df_copy[label_name] = df_copy[label_name].apply(lambda x: 0 if x == 0 else 1)
+
+        for nc in num_col_list:
+            df_copy[nc] = df_copy[nc].apply(lambda x: (x - df_copy[nc].min()) / (df_copy[nc].max() - df_copy[nc].min()))
+
+        y_test = df_copy[label_name]
+        X_test = df_copy.drop([label_name], axis=1).values
+
+        #X_test = pd.get_dummies(X_test).values
+
+        model_0 = joblib.load(os.path.join(config.MODEL_DIR, "model_0"))
+        model_1 = joblib.load(os.path.join(config.MODEL_DIR, "model_1"))
+        model_2 = joblib.load(os.path.join(config.MODEL_DIR, "model_2"))
+        model_3 = joblib.load(os.path.join(config.MODEL_DIR, "model_3"))
+        model_4 = joblib.load(os.path.join(config.MODEL_DIR, "model_4"))
+        model_5 = joblib.load(os.path.join(config.MODEL_DIR, "model_5"))
+
+        predict_y_0_prob = model_0.predict_proba(X_test)[:,1]
+        predict_y_1_prob = model_1.predict_proba(X_test)[:,1]
+        predict_y_2_prob = model_2.predict_proba(X_test)[:,1]
+        predict_y_3_prob = model_3.predict_proba(X_test)[:,1]
+        predict_y_4_prob = model_4.predict(X_test)
+        predict_y_5_prob = model_5.predict_proba(X_test)[:,1]
 
 
-        y_test = df[label_name]
-        X_test = df.drop([label_name], axis=1)
 
+        re = np.array(predict_y_0_prob) + np.array(predict_y_1_prob) + np.array(predict_y_2_prob) + np.array(predict_y_3_prob) \
+              + np.array(predict_y_4_prob) + np.array(predict_y_5_prob)
+        re = re / 6
 
-
-        xgb1 = xgboost.XGBClassifier({'nthread': n_thread})
-        xgb1.load_model(os.path.join(config.MODEL_PATH))
-        test_result = xgb1.predict_proba(X_test)[:, 1]
+        test_result = re
 
         # ===================↑predict==========================
         df_copy["result_probability"] = test_result
 
-        return test_result, y_test, xgb1, df_copy
+        return test_result, y_test, df_copy
 
     def evaluate_model(df, coarse=100):
         n_records = len(df)
         percent_list = list(np.arange(1, coarse + 1) / coarse)
         total_failure = df[label_name].sum()
-        detection_rate_list = []
+        recall_list = []
+        precise_list = []
 
         for percent in percent_list:
             n_sel_records = math.floor(n_records * percent)
-            detection_rate = df.iloc[:n_sel_records][label_name].sum() / total_failure
-            detection_rate_list.append(detection_rate)
+            t1 = df.iloc[:n_sel_records]
+            tp = t1[t1[label_name] == 1].shape[0]
+            t2 = df.iloc[n_sel_records:]
+            tn = t2[t2[label_name] == 0].shape[0]
+
+            recall = tp / total_failure
+            recall_list.append(recall)
+            precise = (tp+tn) / n_records
+            precise_list.append(precise)
+
 
         eval_result_df = pd.DataFrame()
-        eval_result_df['inspection percent (%)'] = np.array(percent_list) * 100
-        eval_result_df['detection rate (%)'] = np.array(detection_rate_list) * 100
+        eval_result_df['recall'] = np.array(recall_list) * 100
+        eval_result_df['precise'] = np.array(precise_list) * 100
 
+        print(eval_result_df)
         return eval_result_df
 
 
@@ -131,11 +158,7 @@ def predict(df):
 
     s = time.time()
 
-    # TODO: change the category label name
-    cols_cate_feature_list = ['sex', 'CPT', 'RER', 'NOMV', 'thal']
-
-
-    test_result, y_test, xgb, df_result = analyse(df=df, cols_cate_feature_list=cols_cate_feature_list)
+    test_result, y_test, df_result = analyse(df)
     df_result = df_result.sort_values(by=["result_probability"], ascending=False)
     df_result.to_csv(config.RESULT_FILE, index=False)
     performance_eval = df_result[["result_probability",label_name]]
@@ -190,7 +213,7 @@ def train():
     def get_model():
         model = Sequential()
 
-        model.add(Dense(32, activation='relu', input_dim= 28))
+        model.add(Dense(32, activation='relu', input_dim= 13))
         model.add(Dense(32, activation='relu'))
         #model.add(Dense(32, activation='relu'))
         model.add(Dense(2, activation='softmax'))
@@ -214,7 +237,31 @@ def train():
     model_4.fit(train_x, train_y, batch_size=16, epochs=20,verbose=0)
     model_5.fit(train_x, train_y)
 
+    # ====================save model====================
+    joblib.dump(model_0, os.path.join(config.MODEL_DIR, "model_0"))
+    joblib.dump(model_0, os.path.join(config.MODEL_DIR, "model_1"))
+    joblib.dump(model_0, os.path.join(config.MODEL_DIR, "model_2"))
+    joblib.dump(model_0, os.path.join(config.MODEL_DIR, "model_3"))
+    joblib.dump(model_0, os.path.join(config.MODEL_DIR, "model_4"))
+    joblib.dump(model_0, os.path.join(config.MODEL_DIR, "model_5"))
 
+
+
+
+    #====================generate feature importance====================
+    importance = model_0.feature_importances_
+
+
+    importance_dic = config.COLS_SHOW_MAP
+
+    feature_description = pd.DataFrame.from_dict(importance_dic, orient= "index").reset_index()
+    feature_description.columns = ["Feature", "Description"]
+    feature_description.to_csv(os.path.join(config.STABLE_DIR, "feature_description.csv"))
+
+
+    feature_importance = feature_description.copy()
+    feature_importance.insert(loc = 1, column = "importance", value = importance)
+    feature_description.to_csv(os.path.join(config.STABLE_DIR, "feature_importance.csv"))
 
 
     predict_y_0 = model_0.predict(eval_x)
@@ -222,9 +269,8 @@ def train():
     predict_y_2 = model_2.predict(eval_x)
     predict_y_3 = model_3.predict(eval_x)
     predict_y_4 = model_4.predict(eval_x)
-    # print(model.feature_importances_)
     predict_y_4 = predict_y_4.argmax(axis=1)
-    predict_y_5 = model_4.predict(eval_x).argmax(axis=1)
+    predict_y_5 = model_5.predict(eval_x)
 
 
 
@@ -242,8 +288,6 @@ def train():
     print(accuracy_score(eval_y,l))
     print()
     print()
-
-
 
     return accuracy_score(eval_y, l)
 
@@ -282,7 +326,4 @@ def train():
     return accuracy_score(eval_y, stack_predict)
     '''
 
-import math
-n = 10
-print(np.mean([train() for _ in range(n)]))
 
