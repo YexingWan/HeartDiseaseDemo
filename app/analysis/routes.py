@@ -11,6 +11,9 @@ basicConfig(filename='error.log', level=DEBUG)
 logger = getLogger()
 logger.addHandler(StreamHandler())
 
+df_columns = ['age', 'sex', 'CPT', 'RBP', 'SC', 'FBS', 'RER', 'MHRA', 'EIA', 'oldpeak', 'SOTPESTS', 'NOMV', 'thal', 'target']
+age_bins = ["0-29", "30-34", "35-39", "40-44", "45-49", "50-54", "55-59", "60-64", "65-69", "70-74", "75-100"]
+
 
 @app.route('/')
 def index():
@@ -101,9 +104,140 @@ def gis_data_layer():
 def download_file(filename):
     return send_from_directory(config.OUTPUT_DIR, filename, as_attachment=True, cache_timeout=0)
 
+@app.route('/traing_data_visialize/CPT', methods=['GET'])
+def provide_data_to_show_CPT():
+    attr_name = "CPT"
+    gender =[1,0]
+    classes = [1,2,3,4]
+    data_df = pd.read_csv(config.TRAINING_DATA, header = None, na_values = '?')
+    data_df.columns = df_columns
+    data_df = data_df.apply(lambda x: x.fillna(x.value_counts().index[0]))
+    data_df['age_range'] = pd.cut(x=data_df['age'], bins=len(age_bins), labels=age_bins)
+    data_df = data_df[['sex','attr_name','age_range']]
+    result = []
+    for g in gender:
+        cur_gender = []
+        cur_df = data_df[data_df["sex"] == g][["age_range", attr_name]]
+        for c in classes:
+            cur_class = cur_df[cur_df[attr_name] == c]
+            cur_class = cur_class.groupby(['age_range']).age_range.agg('count').to_frame('count').reset_index()
+            cur_class['count'] = cur_class['count'].replace(0, "-")
+            cur_gender.append(cur_class['count'].values.tolist())
+        result.append(cur_gender)
+    return jsonify({ "message" : "successful!" , "data": result})
+
+@app.route('/traing_data_visialize/RBP', methods=['GET'])
+def provide_data_to_show_RBP():
+    attr_name = "RBP"
+    data_df = pd.read_csv(config.TRAINING_DATA, header = None, na_values = '?')
+    data_df.columns = df_columns
+    data_df = data_df.apply(lambda x: x.fillna(x.value_counts().index[0]))
+    data_df_m = data_df[data_df["sex"] == 1][["age", attr_name]]
+    data_df_f = data_df[data_df["sex"] == 0][["age", attr_name]]
+    data_df_m = data_df_m.groupby(['age',attr_name]).age.agg('count').to_frame('count').reset_index()
+    data_df_f = data_df_f.groupby(['age',attr_name]).age.agg('count').to_frame('count').reset_index()
+    result = [data_df_m[["age", attr_name, "count"]].values.tolist(), data_df_f[["age", attr_name, "count"]].values.tolist()]
+
+    '''
+    if attr == "CPT" :
+        pass
+    else if(attr == "RBP"):
+        pass
+    else if(attr == "SC"):
+        pass
+    else if(attr == "FBS"):
+        pass
+    else if(attr == "RER"):
+        pass
+    else if(attr == "MHRA"):
+        pass
+    else if(attr == "EIA"):
+        pass
+    else if(attr == "oldpeak"):
+        pass
+    else if(attr == "SOTPESTS"):
+        pass
+    else if(attr == "NOMV"):
+        pass
+    else if(attr == "thal"):
+        pass
+    else if(attr == "target"):
+        pass
+    
+    else:
+        alert("Error")
+    '''
+    return jsonify({ "message" : "successful!" , "data": result})
+
+@app.route('/traing_data_visialize/SC', methods=['GET'])
+def provide_data_to_show_SC():
+    attr_name = "SC"
+    data_df = pd.read_csv(config.TRAINING_DATA, header = None, na_values = '?')
+    data_df.columns = df_columns
+    data_df = data_df.apply(lambda x: x.fillna(x.value_counts().index[0]))
+    data_df_m = data_df[data_df["sex"] == 1][["age", attr_name]]
+    data_df_f = data_df[data_df["sex"] == 0][["age", attr_name]]
+    data_df_m = data_df_m.groupby(['age',attr_name]).age.agg('count').to_frame('count').reset_index()
+    data_df_f = data_df_f.groupby(['age',attr_name]).age.agg('count').to_frame('count').reset_index()
+    result = [data_df_m[["age", attr_name, "count"]].values.tolist(), data_df_f[["age", attr_name, "count"]].values.tolist()]
+    return jsonify({ "message" : "successful!" , "data": result})
 
 
 
+@app.route('/traing_data_visialize/FBS', methods=['GET'])
+def provide_data_to_show_FBS():
+    attr_name = "FBS"
+    gender =[1,0]
+    classes = [0,1]
+    data_df = pd.read_csv(config.TRAINING_DATA, header = None, na_values = '?')
+    data_df.columns = df_columns
+    data_df = data_df.apply(lambda x: x.fillna(x.value_counts().index[0]))
+    data_df['age_range'] = pd.cut(x=data_df['age'], bins=len(age_bins), labels=age_bins)
+    data_df = data_df[['sex',attr_name,'age_range']]
+    result = []
+    for g in gender:
+        cur_gender = []
+        cur_df = data_df[data_df["sex"] == g][["age_range", attr_name]]
+        for c in classes:
+            cur_class = cur_df[cur_df[attr_name] == c]
+            cur_class = cur_class.groupby(['age_range']).age_range.agg('count').to_frame('count').reset_index()
+            cur_class['count'] = cur_class['count'].replace(0, "-")
+            cur_gender.append(cur_class['count'].values.tolist())
+        result.append(cur_gender)
+    return jsonify({ "message" : "successful!" , "data": result})
+
+@app.route('/traing_data_visialize/RER', methods=['GET'])
+def provide_data_to_show_RER():
+    attr_name = "RER"
+    gender =[1,0]
+    classes = [0,1,2]
+    data_df = pd.read_csv(config.TRAINING_DATA, header = None, na_values = '?')
+    data_df.columns = df_columns
+    data_df = data_df.apply(lambda x: x.fillna(x.value_counts().index[0]))
+    data_df['age_range'] = pd.cut(x=data_df['age'], bins=len(age_bins), labels=age_bins)
+    data_df = data_df[['sex',attr_name,'age_range']]
+    result = []
+    for g in gender:
+        cur_gender = []
+        cur_df = data_df[data_df["sex"] == g][["age_range", attr_name]]
+        for c in classes:
+            cur_class = cur_df[cur_df[attr_name] == c]
+            cur_class = cur_class.groupby(['age_range']).age_range.agg('count').to_frame('count').reset_index()
+            cur_class['count'] = cur_class['count'].replace(0, "-")
+            cur_gender.append(cur_class['count'].values.tolist())
+        result.append(cur_gender)
+    return jsonify({ "message" : "successful!" , "data": result})
 
 
-
+@app.route('/traing_data_visialize/MHRA', methods=['GET'])
+def provide_data_to_show_MHRA():
+    attr_name = "MHRA"
+    data_df = pd.read_csv(config.TRAINING_DATA, header = None, na_values = '?')
+    data_df.columns = df_columns
+    data_df = data_df.apply(lambda x: x.fillna(x.value_counts().index[0]))
+    data_df_m = data_df[data_df["sex"] == 1][["age", attr_name]]
+    data_df_f = data_df[data_df["sex"] == 0][["age", attr_name]]
+    data_df_m = data_df_m.groupby(['age',attr_name]).age.agg('count').to_frame('count').reset_index()
+    data_df_f = data_df_f.groupby(['age',attr_name]).age.agg('count').to_frame('count').reset_index()
+    result = [data_df_m[["age", attr_name, "count"]].values.tolist(), data_df_f[["age", attr_name, "count"]].values.tolist()]
+    return jsonify({ "message" : "successful!" , "data": result})
