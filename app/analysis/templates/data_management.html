@@ -144,8 +144,8 @@
                 },
                 formatter: function (params) {
                     console.log(params);
-                    return 'Inspection: ' + params[0].name + '%' + '<br />' +
-                        'Detection: ' + params[0].value.toFixed(2) + '%' + '<br />'
+                    return 'Recall: ' + params[0].name + '%' + '<br />' +
+                        'Precise: ' + params[0].value.toFixed(2) + '%' + '<br />'
                 }
             },
             dataZoom: [{
@@ -156,13 +156,19 @@
                 end: 100
             }],
             xAxis: {
-                name: 'Inspection rate (%)',
-                data: x_data
+                name: 'Recall (%)',
+                data: x_data,
+                min: 0,
+                max: 100,
+                interval: 10
             },
             yAxis: {
-                name: 'Detection rate(%)',
+                name: 'Precise (%)',
                 nameLocation: 'center',
                 nameRotate: 90,
+                min: 0,
+                max: 100,
+                interval: 10,
                 nameTextStyle: {
                     padding: [0, 0, 30, 0]  // top, right, bottom, left
                 }
@@ -171,16 +177,7 @@
                 name: 'Result',
                 type: 'line',
                 animation: true,
-                data: y_data,
-                markArea: {
-                    data: [[{
-                        name: 'Top 20%',
-                        xAxis: '0',
-                        itemStyle: {normal: {color: 'red'}}
-                    }, {
-                        xAxis: '20'
-                    }]]
-                }
+                data: y_data
             }]
         };
 
