@@ -23,9 +23,11 @@
                     <!-- For Traing Data Visualization -->
                     <div class="x_panel" id = 'vis'>
                         <div class = "vis_option" id = "vis_opts">
-                            <select>
+                            <select class = "attr">
+                                <!--
                                     <option value="age">age</option>
                                     <option value="sex">sex</option>
+                                -->
                                     <option value="CPT">chest pain type</option>
                                     <option value="RBP">resting blood pressure</option>
                                     <option value="SC">serum cholestoral in mg/dl</option>
@@ -39,7 +41,7 @@
                                     <option value="thal">thal</option>
                                     <option value="target">target</option>
                             </select>
-                            <button type="button" onclick="Onclick_visualize()">Visualization</button>
+                            <button type="button" id = "show_fig">Visualization</button>
                         </div>
                         <div class = "vis_display" id = "vis_dis" style="width: 600px;height:400px;">
 
@@ -67,71 +69,106 @@
     <script>
 
 
-        $(function () {
-//            TODO: visualize function
-// 基于准备好的dom，初始化echarts实例
+$('#show_fig').on('click', function () {
+    var attr = $(".attr option:selected").val()
+    if(attr == "CPT"){
+        show_figure1();
+    }else if(attr == "RBP"){
+        show_figure2();
+    }else if(attr == "SC"){
+        show_figure2();
+    }else if(attr == "FBS"){
+        show_figure1();
+    }else if(attr == "RER"){
+        show_figure1();
+    }else if(attr == "MHRA"){
+        show_figure1();
+    }else if(attr == "EIA"){
+        show_figure1();
+    }else if(attr == "oldpeak"){
+        show_figure1();
+    }else if(attr == "SOTPESTS"){
+        show_figure1();
+    }else if(attr == "NOMV"){
+        show_figure1();
+    }else if(attr == "thal"){
+        show_figure1();
+    }else if(attr == "target"){
+        show_figure1();
+    }
+    else{
+        alert("Error")
+    }
+  })
+
+
+
+function show_figure1() {
+
+    var myChart = echarts.init(document.getElementById('vis_dis'));
+        var option = {
+            title: {
+                text: 'ECharts 入门示例'
+            },
+            tooltip: {},
+            legend: {
+                data:['销量']
+            },
+            xAxis: {
+                data: ["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"]
+            },
+            yAxis: {},
+            series: [{
+                name: '销量',
+                type: 'bar',
+                data: [5, 5, 5, 5, 5, 5]
+            }]
+        };
+
+        myChart.setOption(option, true);
+
+}
+
+
+function show_figure2() {
+
 var myChart = echarts.init(document.getElementById('vis_dis'));
+    var option = {
+        angleAxis: {
+            type: 'category',
+            data: ['0-10', '11-20', '21-30', '31-40', '41-50', '51-60', '61-70', '71-80','81-90','91-100'],
+            z: 7
+        },
+        radiusAxis: {
+        },
+        polar: {
+        },
+        series: [{
+            type: 'bar',
+            data: [2,1,1,1,1,1,1,1,1,0],
+            coordinateSystem: 'polar',
+            name: 'A',
+            stack: 'a'
+        }, {
+            type: 'bar',
+            data: [1,1,1,1,1,1,1,1,1,1],
+            coordinateSystem: 'polar',
+            name: 'B',
+            stack: 'b'
+        }],
+        legend: {
+            show: true,
+            data: ['male', 'falme']
+        }
+    };
+    myChart.setOption(option, true);
 
-// 指定图表的配置项和数据
-var option = {
-    title: {
-        text: 'ECharts 入门示例'
-    },
-    tooltip: {},
-    legend: {
-        data:['销量']
-    },
-    xAxis: {
-        data: ["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"]
-    },
-    yAxis: {},
-    series: [{
-        name: '销量',
-        type: 'bar',
-        data: [5, 20, 36, 10, 10, 20]
-    }]
-};
-
-// 使用刚指定的配置项和数据显示图表。
-myChart.setOption(option);
-
-        });
+}
 
 
     </script>
 
-<script>
-        function Onclick_visualize() {
-          document.getElementById("demo").innerHTML = "Hello World";
-        }
-        </script>
+
 {% endblock javascripts %}
 
-<script type="text/javascript">
-    // 基于准备好的dom，初始化echarts实例
-    var myChart = echarts.init(document.getElementById('vis_dis'));
-
-    // 指定图表的配置项和数据
-    var option = {
-        title: {
-            text: 'ECharts 入门示例'
-        },
-        tooltip: {},
-        legend: {
-            data:['销量']
-        },
-        xAxis: {
-            data: ["衬衫","羊毛衫","雪纺衫","裤子","高跟鞋","袜子"]
-        },
-        yAxis: {},
-        series: [{
-            name: '销量',
-            type: 'bar',
-            data: [5, 20, 36, 10, 10, 20]
-        }]
-    };
-
-    // 使用刚指定的配置项和数据显示图表。
-    myChart.setOption(option);
-</script>
 
