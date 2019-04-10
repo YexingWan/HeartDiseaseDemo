@@ -121,9 +121,9 @@ def predict(df):
         test_result = re
 
         # ===================↑predict==========================
-        df_copy["result_probability"] = test_result
+        df["result_probability"] = test_result
 
-        return test_result, y_test, df_copy
+        return test_result, y_test, df
 
     def evaluate_model(df, coarse=100):
         n_records = len(df)

@@ -99,6 +99,11 @@
 <!-- loading overlay -->
 <script src="{{ url_for('static', filename='vendors/loadingoverlay/loadingoverlay.min.js') }}"></script>
 
+<script src="{{ url_for('static', filename='vendors/echarts') }}"></script>
+<script src="{{ url_for('static', filename='vendors/echarts4/echarts.min.js') }}"></script>
+<script src="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script src="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css"></script>
+
 <script>
 
     // global file handle
@@ -192,7 +197,8 @@
 
         var x_data = raw_feat_data['data'][0];
         var y_data = raw_feat_data['data'][1];
-
+        alert(x_data)
+        alert(y_data)
         // based on prepared DOM, initialize echarts instance
         var feat_importance_chart = echarts.init(document.getElementById('div_feat_importance'));
 
