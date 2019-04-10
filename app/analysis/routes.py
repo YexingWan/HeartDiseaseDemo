@@ -38,10 +38,6 @@ def get_eval_results():
         json_eval_results = eval_results_df.to_json(orient='split')
         roc_result_df = roc_result_df.to_json(orient='split')
 
-
-        # print(json_eval_results)
-        # print(roc_result_df)
-
         return_msg['data'] = {'PRC':json_eval_results, 'ROC':roc_result_df}
         return_msg['message'] = 'DONE'
     else:
@@ -121,7 +117,7 @@ def provide_data_to_show_CPT():
     data_df.columns = df_columns
     data_df = data_df.apply(lambda x: x.fillna(x.value_counts().index[0]))
     data_df['age_range'] = pd.cut(x=data_df['age'], bins=len(age_bins), labels=age_bins)
-    data_df = data_df[['sex','attr_name','age_range']]
+    data_df = data_df[['sex',attr_name,'age_range']]
     result = []
     for g in gender:
         cur_gender = []
