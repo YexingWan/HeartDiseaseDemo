@@ -6,6 +6,8 @@
 {{ super() }}
 <!-- Dropzone.js -->
 <link href="{{ url_for('static', filename='vendors/dropzone/dist/min/dropzone.min.css') }}" rel="stylesheet">
+<link href="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css" rel="stylesheet"></link>
+
 {% endblock stylesheets %}
 
 {% block content %}
@@ -50,38 +52,45 @@
                         <div id="div_feat_importance" style="width: 90%; height:400px;"></div>
                         <!--/ feature importance -->
 
+                        <!-- splite -->
+                        <br>
                         <div>
                             <hr/>
                         </div>
+                        <br>
+                        <!--/ splite -->
+
 
                         <!-- data table -->
                         <div id="div_table_title" style="width: 90%"></div>
-                        <div id="div_result" style="width: 90%; height:400px;"></div>
+                        <div id="div_result" style="width: 90%;"></div>
+                        <!--/ data table -->
 
-                    </div>
-                </div>
-            </div>
-            <!--/ prediction results display -->
-        </div>
-        <div class="row" style="display: none;" id="div_eval">
-            <!-- data table -->
-            <div>
-                <div class="x_panel">
-                    <div class="x_title">
-                        <h4>Performance Evaluation</h4>
-                    </div>
-                    <div class="x_content">
-                        <!-- evaluation curve -->
-                        <div id="div_eval_curve" style="width: 90%; height:400px;">
+                        <!-- splite -->
+                        <br>
+                        <br>
+                        <br>
+                        <br>
+
+                        <div>
+                            <hr/>
                         </div>
-                        <!--/ evaluation curve -->
+                        <br>
+                        <!--/ splite -->
+
+                        <!-- eval line -->
+                        <div id="div_eval_curve" style="width: 90%; height:400px;"></div>
+                        <div>
+                            <hr/>
+                        </div>
+                        <!--/ eval line -->
+
+
+
                     </div>
                 </div>
-                <!--/ Performance evaluation -->
-
             </div>
         </div>
-        <!--/ prediction results display -->
     </div>
 </div>
 
@@ -99,10 +108,8 @@
 <!-- loading overlay -->
 <script src="{{ url_for('static', filename='vendors/loadingoverlay/loadingoverlay.min.js') }}"></script>
 
-<script src="{{ url_for('static', filename='vendors/echarts') }}"></script>
 <script src="{{ url_for('static', filename='vendors/echarts4/echarts.min.js') }}"></script>
 <script src="//cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
-<script src="//cdn.datatables.net/1.10.19/css/jquery.dataTables.min.css"></script>
 
 <script>
 
@@ -112,35 +119,37 @@
     function show_eval_curv_div(data) {
 
         // prepare data
-        var raw_data_PR = JSON.parse(data['data'][0]);
-        var raw_data_ROC = JSON.parse(data['data'][1]);
+        var raw_data_PRC = JSON.parse(data['data']['PRC']);
+        var raw_data_ROC = JSON.parse(data['data']['ROC']);
 
-        console.log(raw_data_PR )
-        console.log(raw_data_ROC )
+        console.log(raw_data_PRC);
+        console.log(raw_data_ROC);
 
-        var y_data = raw_data_PR['data'][0];
-        var x_data = raw_data_PR['data'][1];
-
-        var x_data_ROC = raw_data_ROC['data'][0];
-        var y_data_ROC = raw_data_ROC['data'][1];
 
         // based on prepared DOM, initialize echarts instance
         var eval_div = document.getElementById('div_eval_curve');
         eval_div.removeAttribute("_echarts_instance_");
         var eval_curve_chart = echarts.init(eval_div);
+        window.onresize = function () {
+            eval_curve_chart.resize()
+        };
 
         // specify chart configuration item and data
         var option = {
             title: {
-                text: 'Result',
+                text: 'PRC and ROC',
                 x: 'center'
             },
             legend: {
                 top: '16.5%',
                 right: '10%',
                 orient: 'vertical',
-                data: ['Result'],
-                selectedMode: false
+                selectedMode: true
+            },
+            legend: {
+                top: '0%',
+                right: '10%',
+                orient: 'vertical'
             },
             tooltip: {
                 trigger: 'axis',
@@ -156,41 +165,104 @@
                 },
                 formatter: function (params) {
                     console.log(params);
-                    return 'Recall: ' + params[0].name + '%' + '<br />' +
-                        'Precise: ' + params[0].value.toFixed(2) + '%' + '<br />'
+
+                    var num_r = params.length;
+                    var recall;
+                    var fpr = params[num_r - 1]['value'][0];
+                    var max_precise;
+                    var max_tpr = params[num_r - 1]['value'][1];
+                    var prc_thr;
+                    var roc_thr = params[num_r - 1]['value'][2];
+
+                    for (var i = num_r - 1; i >= 0; i--) {
+                        re = params[i];
+                        if (re['seriesName'] == "Precise-Recall Curve") {
+                            max_precise = params[i]['value'][1];
+                            recall = params[i]['value'][0];
+                            prc_thr = params[i]['value'][2];
+                            break;
+                        }
+
+                    }
+
+                    return 'Recall: ' + recall.toFixed(2) + '%' + '<br />' +
+                        'Precise: ' + max_precise.toFixed(2) + '%' + '<br />' +
+                        'PRC Thresholds: ' + prc_thr.toFixed(2) + '<br />' +
+                        '-------------------------' + '<br />' +
+                        'FPR: ' + fpr.toFixed(2) + '%' + '<br />' +
+                        'TPR: ' + max_tpr.toFixed(2) + '%' + '<br />' +
+                        'ROC Thresholds: ' + roc_thr.toFixed(2) + '<br />'
                 }
             },
-            dataZoom: [{
-                type: 'slider',
-                show: true,
-                xAxisIndex: [0],
-                start: 0,
-                end: 100
-            }],
-            xAxis: {
-                name: 'Recall (%)',
-                data: x_data,
-                min: 0,
-                max: 100,
-                interval: 10
-            },
-            yAxis: {
-                name: 'Precise (%)',
-                nameLocation: 'center',
-                nameRotate: 90,
-                min: 0,
-                max: 100,
-                interval: 10,
-                nameTextStyle: {
-                    padding: [0, 0, 30, 0]  // top, right, bottom, left
-                }
-            },
+            xAxis: [
+                {
+                    name: 'Recall (%)',
+                    position: 'top',
+                    nameLocation: 'center',
+                    min: 0,
+                    max: 100,
+                    nameTextStyle: {
+                        padding: [0, 0, 0, 0],  // top, right, bottom, left
+                        color: '#c23531'
+                    }
+                }, {
+                    name: 'FPR (%)',
+                    position: 'bottom',
+                    nameLocation: 'center',
+                    min: 0,
+                    max: 100,
+                    nameTextStyle: {
+                        padding: [0, 0, 0, 0]  // top, right, bottom, left
+                    }
+                }],
+            yAxis: [
+                {
+                    name: 'Precise (%)',
+                    nameLocation: 'center',
+                    position: 'right',
+                    nameRotate: 90,
+                    min: 0,
+                    max: 100,
+                    interval: 10,
+                    nameTextStyle: {
+                        padding: [20, 0, 0, 0],  // top, right, bottom, left
+                        color: '#c23531'
+
+                    }
+                }, {
+                    name: 'TPR (%)',
+                    nameLocation: 'center',
+                    position: 'left',
+                    nameRotate: 90,
+                    min: 0,
+                    max: 100,
+                    interval: 10,
+                    nameTextStyle: {
+                        padding: [0, 0, 20, 0]  // top, right, bottom, left
+
+                    }
+
+                }]
+            ,
             series: [{
-                name: 'Result',
+                name: 'Precise-Recall Curve',
                 type: 'line',
+                symbol: 'none',
                 animation: true,
-                data: y_data
-            }]
+                data: raw_data_PRC['data'],
+                xAxisIndex: 0,
+                yAxisIndex: 0
+
+            },
+                {
+                    name: 'ROC',
+                    type: 'line',
+                    symbol: 'none',
+                    animation: true,
+                    data: raw_data_ROC['data'],
+                    xAxisIndex: 1,
+                    yAxisIndex: 1
+                }]
         };
 
         // use configuration item and data specified to show chart
@@ -204,19 +276,19 @@
 
         var x_data = raw_feat_data['data'][0];
         var y_data = raw_feat_data['data'][1];
-        alert(x_data)
-        alert(y_data)
+
         // based on prepared DOM, initialize echarts instance
         var feat_importance_chart = echarts.init(document.getElementById('div_feat_importance'));
+        window.onresize = function () {
+            feat_importance_chart.resize()
+        };
+
 
         // specify chart configuration item and data
         var option = {
             title: {
                 text: 'Feature Importance',
                 x: 'center'
-            },
-            grid: {
-                bottom: 180
             },
             tooltip: {},
             xAxis: {
@@ -254,14 +326,15 @@
         div_result.empty();
         div_table_title.empty();
 
-        
 
         var title_html =
-            '<h4 align="center"><span style="color: #333333; font-weight: bold;">Prediction Results ' +
+            '<h4 align="center"><span style="color: #333333; font-weight: bold;">Prediction Results </span>' +
+            '<br/>' +
+            '<small><a href="/download/result.csv">(download results)</a></small>' +
             '</h4>';
         div_table_title.html(title_html);
 
-        var table_html = '<table id="result_table" class="stripe" style="width:100%"></table>';
+        var table_html = '<table id="result_table" class="stripe" style="width:90%"></table>';
         div_result.html(table_html);
         var table_col = '<thead><tr>';
         var cols = data["columns"];
@@ -289,16 +362,13 @@
             url: '/data_management/predict',
             dataType: "json",
             success: function (data) {
-                console.log(data);
                 if (data['message'] == 'DONE') {
-                    console.log(data);
                     show_feature_importance_div(data);
                     show_data_table_div(data);
                     eval_f()
                 }
             }
         }).fail(function (data) {
-            console.log(data);
             $.LoadingOverlay("hide");
             bootbox.alert({
                 title: "Error",
@@ -318,7 +388,6 @@
             processData: false,
             dataType: 'json'
         }).done(function (data) {
-            console.log(data['message'])
         }).fail(function (e) {
             $.LoadingOverlay("hide");
             // hide progress div
@@ -376,7 +445,7 @@
                 // no files are selected
                 bootbox.alert({
                     title: "Warning",
-                    message: "Two files must be selected!",
+                    message: "files must be selected!",
                     size: 'small'
                 });
             } else {
@@ -395,6 +464,7 @@
                 file_name = null;
             }
         });
+
     });
 
 

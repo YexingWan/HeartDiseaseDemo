@@ -120,12 +120,11 @@ def predict(df):
               + np.array(predict_y_4_prob) + np.array(predict_y_5_prob)
         re = re / 6
 
-        test_result = re
 
         # ===================↑predict==========================
-        df["result_probability"] = test_result
+        df["result_probability"] = re.round(5)
 
-        return test_result, y_test, df
+        return re, y_test, df
 
     def evaluate_model(df, coarse=100):
         df[label_name] = df[label_name].apply(lambda x: 0 if x == 0 else 1)

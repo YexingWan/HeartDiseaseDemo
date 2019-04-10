@@ -35,10 +35,14 @@ def get_eval_results():
     if os.path.isfile(config.EVAL_FILE) :
         eval_results_df = pd.read_csv(config.EVAL_FILE)
         roc_result_df = pd.read_csv(config.ROC_FILE)
-        json_eval_results = eval_results_df.transpose().to_json(orient='split')
-        roc_result_df = roc_result_df.transpose().to_json(orient='split')
+        json_eval_results = eval_results_df.to_json(orient='split')
+        roc_result_df = roc_result_df.to_json(orient='split')
 
-        return_msg['data'] = [json_eval_results, roc_result_df]
+
+        # print(json_eval_results)
+        # print(roc_result_df)
+
+        return_msg['data'] = {'PRC':json_eval_results, 'ROC':roc_result_df}
         return_msg['message'] = 'DONE'
     else:
         return_msg['data'] = ''
@@ -88,6 +92,7 @@ def do_prediction():
 
     c_n_m = config.COLS_SHOW_MAP
     feat_importance_df = pd.read_csv(config.FEAT_IMPORTANCE_FILE)
+    feat_importance_df = feat_importance_df.sort_values(by='importance',ascending=False)
     feat_importance_df = feat_importance_df[['Feature','importance']]
     json_feat_importance = feat_importance_df.transpose().to_json(orient='split')
     return_msg['feat_importance'] = json_feat_importance

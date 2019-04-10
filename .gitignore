@@ -22,18 +22,6 @@ _build
 _static
 _templates
 
-# javascript
-package-lock.json
-
-# ignored path
-data_files/**/*.csv
-data_files/**/*.xlsx
 .idea/
-data_files/**/*.txt
-data_files/**/*.tsv
-
-# ignored model
-*.model
-
 .DS_Store
 

@@ -1,0 +1,14 @@
+Feature,importance,Description
+age,0.046754073,age
+sex,0.05651718,sex
+CPT,0.12337572,chest pain type
+RBP,0.06881147,resting blood pressure
+SC,0.056751125,serum cholestoral
+FBS,0.085602514,fasting blood sugar
+RER,0.052010555,resting electrocardiographic results
+MHRA,0.05989081,maximum heart rate achieved
+EIA,0.12092843,exercise induced angina
+oldpeak,0.06273762,oldpeak
+SOTPESTS,0.07884637,slope of the peak exercise ST segment
+NOMV,0.08502995,number of major vessels (0-3) colored by flourosopy
+thal,0.1027442,thal
