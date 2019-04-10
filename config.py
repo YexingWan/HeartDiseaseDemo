@@ -11,6 +11,8 @@ STABLE_DIR = os.path.join(DATA_DIR, 'stables')
 OUTPUT_DIR = os.path.join(DATA_DIR, 'output')
 MODEL_DIR = os.path.join(BASE_DIR, 'model_files')
 FEAT_DESC_FILE = os.path.join(STABLE_DIR,'feature_description.csv')
+FEAT_IMPORTANCE_FILE = os.path.join(STABLE_DIR,'feature_importance.csv')
+
 MODEL_PATH = os.path.join(MODEL_DIR, 'model.bin')
 EVAL_FILE = os.path.join(OUTPUT_DIR, 'eval.csv')
 RESULT_FILE = os.path.join(OUTPUT_DIR, 'result.csv')
