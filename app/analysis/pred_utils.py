@@ -148,17 +148,16 @@ def predict(df):
             precise_list.append(precise)
 
         precision, recall, thresholds = precision_recall_curve(df[label_name], df["result_probability"])
-        fpr, tpr, thresholds = roc_curve(df[label_name], df["result_probability"])
-
-
         eval_result_df = pd.DataFrame()
         eval_result_df['recall'] = np.around(np.array(recall) * 100, decimals=2)
         eval_result_df['precise'] = np.around(np.array(precision) * 100, decimals=2)
+        eval_result_df['thresholds'] = np.insert(thresholds,0, 0.0)
 
-
+        fpr, tpr, thresholds = roc_curve(df[label_name], df["result_probability"])
         roc_result_df = pd.DataFrame()
         roc_result_df['fpr'] = np.around(np.array(fpr) * 100, decimals=2)
         roc_result_df['tpr'] = np.around(np.array(tpr) * 100,  decimals=2)
+        roc_result_df['thresholds'] = thresholds
 
         return eval_result_df, roc_result_df
 
