@@ -32,11 +32,7 @@ def get_eval_results():
     #print('curretn_year:'+str(year))
 
     return_msg = dict()
-<<<<<<< HEAD
-    if os.path.isfile(config.EVAL_FILE) and os.path.isfile(config.ROC_FILE):
-=======
     if os.path.isfile(config.EVAL_FILE) :
->>>>>>> 2403955617c461f2cc4661af8ac36c2fd89903a2
         eval_results_df = pd.read_csv(config.EVAL_FILE)
         roc_result_df = pd.read_csv(config.ROC_FILE)
         json_eval_results = eval_results_df.transpose().to_json(orient='split')
