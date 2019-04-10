@@ -112,10 +112,17 @@
     function show_eval_curv_div(data) {
 
         // prepare data
-        var raw_data = JSON.parse(data['data']);
+        var raw_data_PR = JSON.parse(data['data'][0]);
+        var raw_data_ROC = JSON.parse(data['data'][1]);
 
-        var x_data = raw_data['data'][0];
-        var y_data = raw_data['data'][1];
+        console.log(raw_data_PR )
+        console.log(raw_data_ROC )
+
+        var y_data = raw_data_PR['data'][0];
+        var x_data = raw_data_PR['data'][1];
+
+        var x_data_ROC = raw_data_ROC['data'][0];
+        var y_data_ROC = raw_data_ROC['data'][1];
 
         // based on prepared DOM, initialize echarts instance
         var eval_div = document.getElementById('div_eval_curve');
