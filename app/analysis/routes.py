@@ -78,14 +78,16 @@ def do_prediction():
 
     # generate training/test data
     # TODO: impliment construct data function
-    df = pred_utils.construct_data()
+    #df = pred_utils.construct_data()
+    data_df = pd.read_csv(config.TRAINING_DATA, header = None, na_values = '?')
+    data_df.columns = df_columns
 
     # do prediction
-    data_list, columns_list = pred_utils.predict(df)
+    data_list, columns_list = pred_utils.predict(data_df)
 
     c_n_m = config.COLS_SHOW_MAP
-    feat_importance_df = pd.read_csv(config.FEAT_IMPORTANCE_FILE)
-
+    feat_importance_df = pd.read_csv(config.FEAT_IMPORTANCE_FILE)
+    feat_importance_df = feat_importance_df[['Feature','importance']]
     json_feat_importance = feat_importance_df.transpose().to_json(orient='split')
     return_msg['feat_importance'] = json_feat_importance
     return_msg['message'] = 'DONE'
