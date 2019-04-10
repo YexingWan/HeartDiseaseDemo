@@ -32,7 +32,7 @@ def get_eval_results():
     #print('curretn_year:'+str(year))
 
     return_msg = dict()
-    if os.path.isfile(config.EVAL_FILE):
+    if os.path.isfile(config.EVAL_FILE) :
         eval_results_df = pd.read_csv(config.EVAL_FILE)
 
         json_eval_results = eval_results_df.transpose().to_json(orient='split')
@@ -140,35 +140,7 @@ def provide_data_to_show_RBP():
     data_df_f = data_df_f.groupby(['age',attr_name]).age.agg('count').to_frame('count').reset_index()
     result = [data_df_m[["age", attr_name, "count"]].values.tolist(), data_df_f[["age", attr_name, "count"]].values.tolist()]
 
-    '''
-    if attr == "CPT" :
-        pass
-    else if(attr == "RBP"):
-        pass
-    else if(attr == "SC"):
-        pass
-    else if(attr == "FBS"):
-        pass
-    else if(attr == "RER"):
-        pass
-    else if(attr == "MHRA"):
-        pass
-    else if(attr == "EIA"):
-        pass
-    else if(attr == "oldpeak"):
-        pass
-    else if(attr == "SOTPESTS"):
-        pass
-    else if(attr == "NOMV"):
-        pass
-    else if(attr == "thal"):
-        pass
-    else if(attr == "target"):
-        pass
     
-    else:
-        alert("Error")
-    '''
     return jsonify({ "message" : "successful!" , "data": result})
 
 @app.route('/traing_data_visialize/SC', methods=['GET'])
