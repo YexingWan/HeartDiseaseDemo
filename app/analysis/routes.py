@@ -32,12 +32,13 @@ def get_eval_results():
     #print('curretn_year:'+str(year))
 
     return_msg = dict()
-    if os.path.isfile(config.EVAL_FILE) :
+    if os.path.isfile(config.EVAL_FILE) and os.path.isfile(config.ROC_FILE):
         eval_results_df = pd.read_csv(config.EVAL_FILE)
-
+        roc_result_df = pd.read_csv(config.ROC_FILE)
         json_eval_results = eval_results_df.transpose().to_json(orient='split')
+        roc_result_df = roc_result_df.transpose().to_json(orient='split')
 
-        return_msg['data'] = json_eval_results
+        return_msg['data'] = [json_eval_results, roc_result_df]
         return_msg['message'] = 'DONE'
     else:
         return_msg['data'] = ''
