@@ -7,6 +7,8 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import precision_recall_curve
+from sklearn.metrics import roc_curve
 from sklearn import svm
 from sklearn.metrics import accuracy_score
 from keras.models import Sequential
@@ -126,9 +128,10 @@ def predict(df):
         return test_result, y_test, df
 
     def evaluate_model(df, coarse=100):
+        df[label_name] = df[label_name].apply(lambda x: 0 if x == 0 else 1)
         n_records = len(df)
         percent_list = list(np.arange(1, coarse + 1) / coarse)
-        total_failure = df[label_name].sum()
+        total_num = df[label_name].sum()
         recall_list = []
         precise_list = []
 
@@ -139,18 +142,25 @@ def predict(df):
             t2 = df.iloc[n_sel_records:]
             tn = t2[t2[label_name] == 0].shape[0]
 
-            recall = tp / total_failure
+            recall = tp / total_num
             recall_list.append(recall)
-            precise = (tp+tn) / n_records
+            precise = tp / (tp + tn)
             precise_list.append(precise)
+
+        precision, recall, thresholds = precision_recall_curve(df[label_name], df["result_probability"])
+        fpr, tpr, thresholds = roc_curve(df[label_name], df["result_probability"])
 
 
         eval_result_df = pd.DataFrame()
-        eval_result_df['recall'] = np.array(recall_list) * 100
-        eval_result_df['precise'] = np.array(precise_list) * 100
+        eval_result_df['recall'] = np.around(np.array(recall) * 100, decimals=2)
+        eval_result_df['precise'] = np.around(np.array(precision) * 100, decimals=2)
 
-        print(eval_result_df)
-        return eval_result_df
+
+        roc_result_df = pd.DataFrame()
+        roc_result_df['fpr'] = np.around(np.array(fpr) * 100, decimals=2)
+        roc_result_df['tpr'] = np.around(np.array(tpr) * 100,  decimals=2)
+
+        return eval_result_df, roc_result_df
 
 
 
@@ -162,8 +172,9 @@ def predict(df):
     df_result = df_result.sort_values(by=["result_probability"], ascending=False)
     df_result.to_csv(config.RESULT_FILE, index=False)
     performance_eval = df_result[["result_probability",label_name]]
-    eval_df = evaluate_model(performance_eval, 100)
+    eval_df, roc_df = evaluate_model(performance_eval, 100)
     eval_df.to_csv(config.EVAL_FILE, index=False)
+    roc_df.to_csv(config.ROC_FILE, index=False)
     print("\nPrediction is done.")
 
     print("Time cost {}s".format(time.time() - s))
@@ -261,7 +272,7 @@ def train():
 
     feature_importance = feature_description.copy()
     feature_importance.insert(loc = 1, column = "importance", value = importance)
-    feature_description.to_csv(os.path.join(config.STABLE_DIR, "feature_importance.csv"))
+    feature_importance.to_csv(os.path.join(config.STABLE_DIR, "feature_importance.csv"), index= None)
 
 
     predict_y_0 = model_0.predict(eval_x)
@@ -327,3 +338,9 @@ def train():
     '''
 
 
+
+#
+#
+# data_df = pd.read_csv(config.TRAINING_DATA, header = None, na_values = '?')
+# data_df.columns = df_columns
+# predict(data_df)

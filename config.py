@@ -15,6 +15,7 @@ FEAT_DESC_FILE = os.path.join(STABLE_DIR,'feature_description.csv')
 FEAT_IMPORTANCE_FILE = os.path.join(STABLE_DIR,'feature_importance.csv')
 MODEL_PATH = os.path.join(MODEL_DIR, 'model.bin')
 EVAL_FILE = os.path.join(OUTPUT_DIR, 'eval.csv')
+ROC_FILE = os.path.join(OUTPUT_DIR, 'roc.csv')
 RESULT_FILE = os.path.join(OUTPUT_DIR, 'result.csv')
 
 # file
