@@ -7,6 +7,7 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import precision_recall_curve
 from sklearn import svm
 from sklearn.metrics import accuracy_score
 from keras.models import Sequential
@@ -128,7 +129,7 @@ def predict(df):
     def evaluate_model(df, coarse=100):
         n_records = len(df)
         percent_list = list(np.arange(1, coarse + 1) / coarse)
-        total_failure = df[label_name].sum()
+        total_num = df[label_name].sum()
         recall_list = []
         precise_list = []
 
@@ -139,15 +140,22 @@ def predict(df):
             t2 = df.iloc[n_sel_records:]
             tn = t2[t2[label_name] == 0].shape[0]
 
-            recall = tp / total_failure
+            recall = tp / total_num
             recall_list.append(recall)
-            precise = (tp+tn) / n_records
+            precise = tp / (tp + tn)
             precise_list.append(precise)
 
 
+        precision, recall, thresholds = precision_recall_curve(df[label_name], df["result_probability"])
+
+        print(thresholds)
         eval_result_df = pd.DataFrame()
-        eval_result_df['recall'] = np.array(recall_list) * 100
-        eval_result_df['precise'] = np.array(precise_list) * 100
+        eval_result_df['recall'] = np.array(recall) * 100
+        eval_result_df['precise'] = np.array(precision) * 100
+        #eval_result_df['thresholds'] = np.array(thresholds) * 100
+
+
+
 
         print(eval_result_df)
         return eval_result_df
@@ -261,7 +269,7 @@ def train():
 
     feature_importance = feature_description.copy()
     feature_importance.insert(loc = 1, column = "importance", value = importance)
-    feature_description.to_csv(os.path.join(config.STABLE_DIR, "feature_importance.csv"))
+    feature_importance.to_csv(os.path.join(config.STABLE_DIR, "feature_importance.csv"), index= None)
 
 
     predict_y_0 = model_0.predict(eval_x)
@@ -327,3 +335,9 @@ def train():
     '''
 
 
+train()
+
+#
+# data_df = pd.read_csv(config.TRAINING_DATA, header = None, na_values = '?')
+# data_df.columns = df_columns
+# predict(data_df)
