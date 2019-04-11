@@ -288,7 +288,7 @@ function show_figure4(data) {
         };
 
         
-        myChart.setOption(option);
+        myChart.setOption(option, true);
 }
 
 
@@ -520,7 +520,7 @@ function show_figure6(data) {
         };
 
         
-        myChart.setOption(option);
+        myChart.setOption(option, true);
 }
 
 function show_figure7(data) {
@@ -680,7 +680,7 @@ function show_figure7(data) {
         };
 
         
-        myChart.setOption(option);
+        myChart.setOption(option, true);
 }
 
 function show_figure8(data) {
@@ -905,7 +905,7 @@ function attribute9(data){
                 }
             ]
         };
-        myChart.setOption(option, True);
+        myChart.setOption(option, true);
 }
 
 function attribute10(data){
@@ -1163,7 +1163,7 @@ function attribute11(data){
             
         ]
     };
-    myChart.setOption(option, True);
+    myChart.setOption(option, true);
 }
 
 function attribute12(data){
@@ -1347,7 +1347,7 @@ function attribute12(data){
             }
         ]
     };
-        myChart.setOption(option, True);
+        myChart.setOption(option, true);
 }
 
 
@@ -1504,7 +1504,7 @@ var redata={"x": ["25-29", "30-34", "35-39", "40-44", "45-49", "50-54", "55-59",
             
         ]
     };
-    myChart.setOption(option, True);
+    myChart.setOption(option, true);
 }
 
 function attribute14(data){
@@ -1720,5 +1720,5 @@ function attribute14(data){
             
         ]
     };
-    myChart.setOption(option, True);
+    myChart.setOption(option, true);
 }
