@@ -910,103 +910,102 @@ function attribute9(data){
 
 function attribute10(data){
     var myChart = echarts.init(document.getElementById('vis_dis'));
-        var schema = [
-            {name: 'AGE', index: 0, text: 'Age'},
-            {name: 'Blood Pressure', index: 1, text: 'Blood Pressure'},
-            {name: 'Amount', index: 2, text: 'Amount'}
-        ];
-        var option = {
-            backgroundColor: new echarts.graphic.RadialGradient(0.3, 0.3, 0.8, [{
-            offset: 0,
-            color: '#f7f8fa'}, 
-            {
-                offset: 1,
-                color: '#cdd0d5'
-            }]),
-            legend: {
-                right: 10,
-                data: ['Male', 'Female']
-                
-            },
-            tooltip: {
-                padding: 10,
-                backgroundColor: '#222',
-                borderColor: '#777',
-                borderWidth: 1,
-                formatter: function (obj) {
-                    var value = obj.value;
-                    return  schema[0].text + ': ' + value[0] + '<br>'
-                        + schema[1].text + '：' + value[1] + '<br>'
-                        + schema[2].text + '：' + value[2] + '<br>';
+    var schema = [
+        {name: 'AGE', index: 0, text: 'Age'},
+        {name: 'Blood Pressure', index: 1, text: 'oldpeak'},
+        {name: 'Amount', index: 2, text: 'Amount'}
+    ];
+    var option = {
+        backgroundColor: new echarts.graphic.RadialGradient(0.3, 0.3, 0.8, [{
+        offset: 0,
+        color: '#f7f8fa'}, 
+        {
+            offset: 1,
+            color: '#cdd0d5'
+        }]),
+        legend: {
+            right: 10,
+            data: ['Male', 'Female']
+        },
+        tooltip: {
+            padding: 10,
+            backgroundColor: '#222',
+            borderColor: '#777',
+            borderWidth: 1,
+            formatter: function (obj) {
+                var value = obj.value;
+                return  schema[0].text + ': ' + value[0] + '<br>'
+                    + schema[1].text + '：' + value[1] + '<br>'
+                    + schema[2].text + '：' + value[2] + '<br>';
+            }
+        },
+        xAxis: {
+            min:25,
+            name: 'Ages',
+            nameLocation: 'end',
+            nameTextStyle:{fontWeight:1000},
+            splitLine: {
+                lineStyle: {
+                    type: 'dashed'
+                }
+            }
+        },
+        yAxis: {
+            name: 'oldpeak',
+            nameLocation: 'end',
+            nameTextStyle:{fontWeight:1000},
+            splitLine: {
+                lineStyle: {
+                    type: 'dashed'
                 }
             },
-            xAxis: {
-                min:25,
-                name: 'Ages',
-                nameLocation: 'end',
-                nameTextStyle:{fontWeight:1000},
-                splitLine: {
-                    lineStyle: {
-                        type: 'dashed'
-                    }
-                }
+            scale: true
+        },
+        series: [{
+            name: 'Male',
+            data: data[0],
+            type: 'scatter',
+            symbolSize: function (data) {
+                return Math.sqrt(data[2]) / 0.15;
             },
-            yAxis: {
-                name: 'oldpeak',
-                nameLocation: 'end',
-                nameTextStyle:{fontWeight:1000},
-                splitLine: {
-                    lineStyle: {
-                        type: 'dashed'
-                    }
-                },
-                scale: true
+            itemStyle: {
+                normal: {
+                    shadowBlur: 10,
+                    shadowColor: 'rgba(120, 36, 50, 0.5)',
+                    shadowOffsetY: 5,
+                    color: new echarts.graphic.RadialGradient(0.4, 0.3, 1, [{
+                        offset: 0,
+                        color: 'rgb(251, 118, 123)'
+                    }, {
+                        offset: 1,
+                        color: 'rgb(204, 46, 72)'
+                    }])
+                }
+            }
+        }, {
+            name: 'Female',
+            data: data[1],
+            type: 'scatter',
+            symbolSize: function (data) {
+                return Math.sqrt(data[2]) / 0.15;
             },
-            series: [{
-                name: 'Male',
-                data: data[0],
-                type: 'scatter',
-                symbolSize: function (data) {
-                    return Math.sqrt(data[2]) / 0.15;
-                },
-                itemStyle: {
-                    normal: {
-                        shadowBlur: 10,
-                        shadowColor: 'rgba(120, 36, 50, 0.5)',
-                        shadowOffsetY: 5,
-                        color: new echarts.graphic.RadialGradient(0.4, 0.3, 1, [{
-                            offset: 0,
-                            color: 'rgb(251, 118, 123)'
-                        }, {
-                            offset: 1,
-                            color: 'rgb(204, 46, 72)'
-                        }])
-                    }
+            itemStyle: {
+                normal: {
+                    shadowBlur: 10,
+                    shadowColor: 'rgba(25, 100, 150, 0.5)',
+                    shadowOffsetY: 5,
+                    color: new echarts.graphic.RadialGradient(0.4, 0.3, 1, [{
+                        offset: 0,
+                        color: 'rgb(129, 227, 238)'
+                    }, {
+                        offset: 1,
+                        color: 'rgb(25, 183, 207)'
+                    }])
                 }
-            }, {
-                name: 'Female',
-                data: data[1],
-                type: 'scatter',
-                symbolSize: function (data) {
-                    return Math.sqrt(data[2]) / 0.15;
-                },
-                itemStyle: {
-                    normal: {
-                        shadowBlur: 10,
-                        shadowColor: 'rgba(25, 100, 150, 0.5)',
-                        shadowOffsetY: 5,
-                        color: new echarts.graphic.RadialGradient(0.4, 0.3, 1, [{
-                            offset: 0,
-                            color: 'rgb(129, 227, 238)'
-                        }, {
-                            offset: 1,
-                            color: 'rgb(25, 183, 207)'
-                        }])
-                    }
-                }
-            }]
-        };
-        myChart.setOption(option, true);
+            }
+        }]
+    };
+    myChart.setOption(option, true);
 
 }
 
@@ -1259,9 +1258,9 @@ function attribute12(data){
             {
                 name: 'vessels colored:2',
                 type: 'bar',
-                stack: 'total1',
-                xAxisIndex: 1,
-                yAxisIndex: 1,
+                stack: 'total',
+                xAxisIndex: 0,
+                yAxisIndex: 0,
                 label: {
                     normal: {
                         show: true,
@@ -1274,9 +1273,9 @@ function attribute12(data){
             {
                 name: 'vessels colored:3',
                 type: 'bar',
-                stack: 'total1',
-                xAxisIndex: 1,
-                yAxisIndex: 1,
+                stack: 'total',
+                xAxisIndex: 0,
+                yAxisIndex: 0,
                 label: {
                     normal: {
                         show: true,
@@ -1288,9 +1287,9 @@ function attribute12(data){
             {
                 name: 'vessels colored:0',
                 type: 'bar',
-                stack: 'total',
-                xAxisIndex: 0,
-                yAxisIndex: 0,
+                stack: 'total1',
+                xAxisIndex: 1,
+                yAxisIndex: 1,
                 label: {
                     normal: {
                         show: true,
@@ -1303,9 +1302,9 @@ function attribute12(data){
             {
                 name: 'vessels colored:1',
                 type: 'bar',
-                stack: 'total',
-                xAxisIndex: 0,
-                yAxisIndex: 0,
+                stack: 'total1',
+                xAxisIndex: 1,
+                yAxisIndex: 1,
                 label: {
                     normal: {
                         show: true,
