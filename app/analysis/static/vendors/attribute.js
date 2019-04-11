@@ -288,7 +288,7 @@ function show_figure4(data) {
         };
 
         
-        myChart.setOption(option);
+        myChart.setOption(option, true);
 }
 
 
@@ -520,7 +520,7 @@ function show_figure6(data) {
         };
 
         
-        myChart.setOption(option);
+        myChart.setOption(option, true);
 }
 
 function show_figure7(data) {
@@ -680,7 +680,7 @@ function show_figure7(data) {
         };
 
         
-        myChart.setOption(option);
+        myChart.setOption(option, true);
 }
 
 function show_figure8(data) {
@@ -905,109 +905,110 @@ function attribute9(data){
                 }
             ]
         };
-        myChart.setOption(option);
+        myChart.setOption(option, true);
 }
 
 function attribute10(data){
     var myChart = echarts.init(document.getElementById('vis_dis'));
-    var schema = [
-        {name: 'AGE', index: 0, text: 'Age'},
-        {name: 'oldpeak', index: 1, text: 'Blood Pressure'},
-        {name: 'Amount', index: 2, text: 'Amount'}
-    ];
-    var option = {
-        backgroundColor: new echarts.graphic.RadialGradient(0.3, 0.3, 0.8, [{
-        offset: 0,
-        color: '#f7f8fa'}, 
-        {
-            offset: 1,
-            color: '#cdd0d5'
-        }]),
-        legend: {
-            right: 10,
-            data: ['Male', 'Female']
-        },
-        tooltip: {
-            padding: 10,
-            backgroundColor: '#222',
-            borderColor: '#777',
-            borderWidth: 1,
-            formatter: function (obj) {
-                var value = obj.value;
-                return  schema[0].text + ': ' + value[0] + '<br>'
-                    + schema[1].text + '：' + value[1] + '<br>'
-                    + schema[2].text + '：' + value[2] + '<br>';
-            }
-        },
-        xAxis: {
-            min:25,
-            name: 'Ages',
-            nameLocation: 'end',
-            nameTextStyle:{fontWeight:1000},
-            splitLine: {
-                lineStyle: {
-                    type: 'dashed'
-                }
-            }
-        },
-        yAxis: {
-            name: 'oldpeak',
-            nameLocation: 'end',
-            nameTextStyle:{fontWeight:1000},
-            splitLine: {
-                lineStyle: {
-                    type: 'dashed'
+        var schema = [
+            {name: 'AGE', index: 0, text: 'Age'},
+            {name: 'Blood Pressure', index: 1, text: 'Blood Pressure'},
+            {name: 'Amount', index: 2, text: 'Amount'}
+        ];
+        var option = {
+            backgroundColor: new echarts.graphic.RadialGradient(0.3, 0.3, 0.8, [{
+            offset: 0,
+            color: '#f7f8fa'}, 
+            {
+                offset: 1,
+                color: '#cdd0d5'
+            }]),
+            legend: {
+                right: 10,
+                data: ['Male', 'Female']
+                
+            },
+            tooltip: {
+                padding: 10,
+                backgroundColor: '#222',
+                borderColor: '#777',
+                borderWidth: 1,
+                formatter: function (obj) {
+                    var value = obj.value;
+                    return  schema[0].text + ': ' + value[0] + '<br>'
+                        + schema[1].text + '：' + value[1] + '<br>'
+                        + schema[2].text + '：' + value[2] + '<br>';
                 }
             },
-            scale: true
-        },
-        series: [{
-            name: 'Male',
-            data: data[0],
-            type: 'scatter',
-            symbolSize: function (data) {
-                return Math.sqrt(data[2]) / 0.15;
-            },
-            itemStyle: {
-                normal: {
-                    shadowBlur: 10,
-                    shadowColor: 'rgba(120, 36, 50, 0.5)',
-                    shadowOffsetY: 5,
-                    color: new echarts.graphic.RadialGradient(0.4, 0.3, 1, [{
-                        offset: 0,
-                        color: 'rgb(251, 118, 123)'
-                    }, {
-                        offset: 1,
-                        color: 'rgb(204, 46, 72)'
-                    }])
+            xAxis: {
+                min:25,
+                name: 'Ages',
+                nameLocation: 'end',
+                nameTextStyle:{fontWeight:1000},
+                splitLine: {
+                    lineStyle: {
+                        type: 'dashed'
+                    }
                 }
-            }
-        }, {
-            name: 'Female',
-            data: data[1],
-            type: 'scatter',
-            symbolSize: function (data) {
-                return Math.sqrt(data[2]) / 0.15;
             },
-            itemStyle: {
-                normal: {
-                    shadowBlur: 10,
-                    shadowColor: 'rgba(25, 100, 150, 0.5)',
-                    shadowOffsetY: 5,
-                    color: new echarts.graphic.RadialGradient(0.4, 0.3, 1, [{
-                        offset: 0,
-                        color: 'rgb(129, 227, 238)'
-                    }, {
-                        offset: 1,
-                        color: 'rgb(25, 183, 207)'
-                    }])
+            yAxis: {
+                name: 'oldpeak',
+                nameLocation: 'end',
+                nameTextStyle:{fontWeight:1000},
+                splitLine: {
+                    lineStyle: {
+                        type: 'dashed'
+                    }
+                },
+                scale: true
+            },
+            series: [{
+                name: 'Male',
+                data: data[0],
+                type: 'scatter',
+                symbolSize: function (data) {
+                    return Math.sqrt(data[2]) / 0.15;
+                },
+                itemStyle: {
+                    normal: {
+                        shadowBlur: 10,
+                        shadowColor: 'rgba(120, 36, 50, 0.5)',
+                        shadowOffsetY: 5,
+                        color: new echarts.graphic.RadialGradient(0.4, 0.3, 1, [{
+                            offset: 0,
+                            color: 'rgb(251, 118, 123)'
+                        }, {
+                            offset: 1,
+                            color: 'rgb(204, 46, 72)'
+                        }])
+                    }
                 }
-            }
-        }]
-    };
-    myChart.setOption(option);
-}
+            }, {
+                name: 'Female',
+                data: data[1],
+                type: 'scatter',
+                symbolSize: function (data) {
+                    return Math.sqrt(data[2]) / 0.15;
+                },
+                itemStyle: {
+                    normal: {
+                        shadowBlur: 10,
+                        shadowColor: 'rgba(25, 100, 150, 0.5)',
+                        shadowOffsetY: 5,
+                        color: new echarts.graphic.RadialGradient(0.4, 0.3, 1, [{
+                            offset: 0,
+                            color: 'rgb(129, 227, 238)'
+                        }, {
+                            offset: 1,
+                            color: 'rgb(25, 183, 207)'
+                        }])
+                    }
+                }
+            }]
+        };
+        myChart.setOption(option, true);
 
+}
 
 function attribute11(data){
     var myChart = echarts.init(document.getElementById('vis_dis'));
@@ -1162,7 +1163,7 @@ function attribute11(data){
             
         ]
     };
-    myChart.setOption(option);
+    myChart.setOption(option, true);
 }
 
 function attribute12(data){
@@ -1346,7 +1347,7 @@ function attribute12(data){
             }
         ]
     };
-        myChart.setOption(option);
+        myChart.setOption(option, true);
 }
 
 
@@ -1503,7 +1504,7 @@ var redata={"x": ["25-29", "30-34", "35-39", "40-44", "45-49", "50-54", "55-59",
             
         ]
     };
-    myChart.setOption(option);
+    myChart.setOption(option, true);
 }
 
 function attribute14(data){
@@ -1719,5 +1720,5 @@ function attribute14(data){
             
         ]
     };
-    myChart.setOption(option);
+    myChart.setOption(option, true);
 }
