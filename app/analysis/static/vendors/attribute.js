@@ -588,7 +588,7 @@ function show_figure7(data) {
         nameTextStyle:{fontWeight:1000}}],
     series: [
         {
-            name: 'typical angin',
+            name: 'Normal',
             type: 'bar',
             stack: 'total',
             xAxisIndex: 0,
@@ -603,7 +603,7 @@ function show_figure7(data) {
 
         },
         {
-            name: 'atypical angina',
+            name: 'Having ST-T wave abnormality',
             type: 'bar',
             stack: 'total',
             xAxisIndex: 0,
@@ -618,7 +618,7 @@ function show_figure7(data) {
 
         },
         {
-            name: 'non-anginal',
+            name: 'showing probable or definite left ventricular hypertrophy by Estes’ criteria',
             type: 'bar',
             stack: 'total',
             xAxisIndex: 0,
@@ -632,7 +632,7 @@ function show_figure7(data) {
             data: redata['male'][2]
 
         },{
-            name: 'typical angin',
+            name: 'Normal',
             type: 'bar',
             stack: 'total1',
             xAxisIndex: 1,
@@ -647,7 +647,7 @@ function show_figure7(data) {
 
         },
         {
-            name: 'atypical angina',
+            name: 'Having ST-T wave abnormality',
             type: 'bar',
             stack: 'total1',
             xAxisIndex: 1,
@@ -662,7 +662,7 @@ function show_figure7(data) {
 
         },
         {
-            name: 'non-anginal',
+            name: 'showing probable or definite left ventricular hypertrophy by Estes’ criteria',
             type: 'bar',
             stack: 'total1',
             xAxisIndex: 1,
