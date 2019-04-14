@@ -288,15 +288,15 @@ def train():
          + np.array(predict_y_4) + np.array(predict_y_5)
     re = map(lambda x:1 if x >= 3 else 0,re)
     l = list(re)
-    print(accuracy_score(eval_y, predict_y_0))
-    print(accuracy_score(eval_y, predict_y_1))
-    print(accuracy_score(eval_y, predict_y_2))
-    print(accuracy_score(eval_y, predict_y_3))
-    print(accuracy_score(eval_y, predict_y_4))
-    print(accuracy_score(eval_y, predict_y_5))
-    print(accuracy_score(eval_y,l))
-    print()
-    print()
+    # print(accuracy_score(eval_y, predict_y_0))
+    # print(accuracy_score(eval_y, predict_y_1))
+    # print(accuracy_score(eval_y, predict_y_2))
+    # print(accuracy_score(eval_y, predict_y_3))
+    # print(accuracy_score(eval_y, predict_y_4))
+    # print(accuracy_score(eval_y, predict_y_5))
+    # print(accuracy_score(eval_y,l))
+    # print()
+    # print()
 
     return accuracy_score(eval_y, l)
 
@@ -337,8 +337,6 @@ def train():
 
 
 
-#
-#
-# data_df = pd.read_csv(config.TRAINING_DATA, header = None, na_values = '?')
-# data_df.columns = df_columns
-# predict(data_df)
+
+if __name__ == '__main__':
+    train()
